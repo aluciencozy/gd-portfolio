@@ -2,30 +2,22 @@
 
 ## Concept
 
-The character travels through portals as the visitor moves between portfolio sections. Each portal marks a change in the character's mode and gives the page transition a clear narrative beat:
+The character travels through portals as the visitor moves between portfolio scenes. Each portal marks a change in character mode:
 
-1. The Hero introduces the Cube.
-2. The About section introduces the Ship.
-3. The Projects section introduces the Ball.
-4. The Contact section completes the journey with the Wave.
+1. Hero introduces the Cube.
+2. About introduces the Ship.
+3. Projects introduces the Ball.
+4. Contact completes the journey with the Wave.
 
-The effect should feel like a small, authored game sequence embedded in a portfolio, not like a game that visitors must play to access information.
+The effect should feel like a small authored game sequence embedded in a portfolio, not like a game visitors must learn to access information.
 
-## Interface hierarchy
+## Interaction model
 
-Normal page content is the primary interface. The game-inspired animation is the storytelling layer.
+The portfolio uses a controlled viewport. Wheel movement, touch swipes, keyboard commands, visible navigation, and previous/next controls all request one destination scene through the same navigator. The page does not partially scroll between scenes.
 
-The content must therefore remain understandable when a visitor:
+The transition layer simulates horizontal travel. The character stays near a stable focal point while the background, obstacles, and destination portal move across the viewport. Reverse navigation mirrors the travel direction and uses the current mode’s profile with the destination scene’s portal and character.
 
-- scrolls normally;
-- uses visible section navigation;
-- navigates with a keyboard;
-- has reduced motion enabled;
-- skips the intro or a transition;
-- loads the page before artwork finishes loading; or
-- uses a device that cannot sustain the full visual treatment.
-
-Animation may guide attention and create memorable moments, but it must not be the only way to discover a section, activate a link, or understand the owner’s work.
+The Contact scene includes a bounded internal-scroll asset gallery. Gallery scrolling is isolated from scene navigation.
 
 ## Information architecture
 
@@ -36,39 +28,38 @@ Animation may guide attention and create memorable moments, but it must not be t
 | Projects | Ball | What work can a visitor inspect? |
 | Contact | Wave | How can a visitor start a conversation? |
 
-The section order is fixed for the first version. Direct section navigation must still be available even when a visitor does not follow the authored sequence.
+The section order is fixed for the first version. Direct section navigation is available even when a visitor does not follow the forward sequence.
 
 ## Success criteria
 
 The experience succeeds when:
 
-- Visitors understand who the owner is quickly.
-- Visitors can reach projects and contact information without learning game mechanics.
-- The animation feels memorable without preventing browsing.
-- The site works on desktop, mobile, keyboard navigation, and reduced-motion settings.
-- The section content remains readable while scenes are active and after they settle.
-- A visitor can skip or bypass animation without losing context or access to the same actions.
-- A first-time visitor can identify the next useful action without being asked to decode the transition.
+- Visitors understand the current scene quickly.
+- Visitors can reach every scene without learning game mechanics.
+- The animation feels memorable without creating overlapping or locked states.
+- The site works on desktop, mobile, keyboard navigation, and touch input.
+- Section content remains readable while scenes are active and after they settle.
+- Every transition has a visible skip path.
+- Direct hash navigation and browser history resolve to stable scene states.
 
 ## Experience principles
 
 ### Content first
 
-Headings, explanatory text, links, and calls to action have a stable place in the document flow. Scene choreography supports those elements instead of replacing them.
+Headings, explanatory text, links, and calls to action have a stable place in the active scene. Scene choreography supports those elements instead of replacing them.
 
 ### One clear event at a time
 
-Transitions should have a readable beginning, travel beat, portal beat, and arrival beat. Extra decoration must not compete with the character or destination content.
+Transitions have a readable beginning, travel beat, portal beat, and arrival beat. Extra decoration must not compete with the character or destination content.
 
 ### Designed adaptation
 
-Mobile uses a deliberate composition with fewer visual elements and a shorter or simplified route where necessary. It is not a desktop scene scaled until it fits.
+The first mobile implementation uses the same vector composition with deliberate responsive sizing. Scene geometry can be simplified later if visual review identifies clipping or crowding.
 
 ### Graceful interruption
 
-Visitors can change direction or choose a section without leaving the application in a half-transitioned state. The system either ignores excess input or queues one request according to the experience model.
+Visitors can change direction or choose a scene without leaving the application in a half-transitioned state. Extra input is ignored during an active transition, and skip or recovery resolves to the destination.
 
 ### Memorable, not exhausting
 
-The first visit should feel special. Repeated navigation, refreshes, and direct links should stay efficient and predictable.
-
+The first visit should feel special. Repeated navigation, refreshes, and direct hashes should stay efficient and predictable.

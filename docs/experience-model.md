@@ -2,74 +2,61 @@
 
 ## User journey
 
-On first load, the visitor sees the intro sequence. The Cube moves through the initial obstacle course, enters the first portal, and resolves into the Hero section. The intro plays once per page session and has a visible skip path.
+On first load, the visitor starts in the Hero scene with the Cube. The authored intro is deferred until the foundation is approved.
 
-From the Hero onward, the visitor can move through the section sequence using scrolling, visible buttons, keyboard input, or touch gestures. A transition covers the viewport, carries the current character through an authored scene, and reveals the destination section when the arriving character settles.
-
-The visitor may also use the visible section navigation to reach a destination directly. Direct navigation must preserve readable content even when the authored route is bypassed.
+From Hero onward, the visitor can move through the scene sequence using wheel movement, touch swipes, visible buttons, keyboard input, or direct section navigation. A viewport-filling transition carries the current mode through a moving environment and destination portal before revealing the arriving mode.
 
 ## State model
 
 The primary state sequence is:
 
 ```text
-intro
 hero-idle
-transitioning-to-about
+transitioning-from-cube
 about-idle
-transitioning-to-projects
+transitioning-from-ship
 projects-idle
-transitioning-to-contact
+transitioning-from-ball
 contact-idle
+transitioning-from-wave
 ```
 
-`hero-idle`, `about-idle`, `projects-idle`, and `contact-idle` are stable content states. The `transitioning-*` states are exclusive animation states. `intro` is a one-time entry state that resolves into `hero-idle` or directly into a skip result.
+The four idle states are stable content states. Transition states are exclusive animation states. The source mode selects the travel profile; the destination scene selects the portal and arriving character.
 
 ## Input behavior
 
-Scroll, visible navigation buttons, keyboard controls, and touch navigation all request a destination scene through the same navigator. They must not each implement their own transition state.
+All inputs request a destination through the same navigator:
 
-- A request for the next scene moves forward in the sequence.
-- A request for the previous scene moves backward when a previous scene exists.
-- Direct section navigation requests a specific scene.
-- One transition may run at a time.
-- Extra input during a transition is ignored or queued only once.
-- A queued request is discarded if it would be invalid after the active transition completes.
-- Navigation remains available through a visible fallback control.
+- Wheel movement in either direction requests the next or previous scene.
+- A meaningful touch swipe requests the next or previous scene.
+- Arrow keys, PageUp/PageDown, Space, Home, and End map to scene requests.
+- Visible section buttons request a direct destination.
+- Previous and next controls request adjacent scenes.
+- Browser hash Back/Forward requests the hash destination.
+- One transition runs at a time.
+- Extra requests during a transition are ignored.
+- Gallery scrolling is isolated and does not request a scene.
 
-The exact gesture threshold and scroll cooldown are implementation details, but they must prevent accidental repeated transitions from one physical input.
+The viewport is locked to prevent partial document scrolling. The Contact asset gallery is the intentional internal-scroll exception.
 
 ## Transition contract
 
-Every authored transition must satisfy this contract:
+Every transition must satisfy this contract:
 
-1. The current section remains understandable until the transition begins.
-2. The transition scene fully covers the viewport.
-3. The character, portal, obstacles, and visual layers have deterministic positions and ordering.
-4. The character reaches the destination portal in a complete, authored motion.
-5. The destination character arrives in a stable pose.
-6. The destination section becomes readable after arrival.
-7. The navigator unlocks and exposes the next valid actions.
-8. An interrupted, skipped, or reduced-motion path resolves to the same destination content state.
+1. The current scene remains understandable until the transition begins.
+2. The transition fully covers the viewport.
+3. Character, portal, obstacles, and visual layers have deterministic positions and ordering.
+4. The source-mode profile completes its travel phase.
+5. The destination portal crosses the anchored character.
+6. The destination character arrives in a stable pose.
+7. The destination scene becomes readable after arrival.
+8. The navigator unlocks and exposes the next valid actions.
+9. Skip and timeout recovery resolve to the same destination state.
 
 ## Intro behavior
 
-The initial intro animation plays once per page session. It includes the Cube jumping over spikes, interacting with jump orbs, entering the first portal, and resolving into the Hero. A visible skip control completes the intro immediately and leaves the visitor in `hero-idle`.
-
-The intro must not delay access to the Hero indefinitely. The skip control must be keyboard reachable, announced clearly, and available throughout the sequence.
-
-## Reduced motion
-
-Reduced-motion mode preserves the state model and all destination content but changes the visual behavior:
-
-- Intro resolves with a short fade or direct reveal.
-- Transition scenes use short fades and direct section changes.
-- Continuous idle animation, camera movement, particles, and large travel motions are removed or minimized.
-- Navigation remains available through normal scrolling and visible controls.
-
-Reduced motion is a behavior mode, not a content mode. It must not remove headings, links, project information, or contact actions.
+The authored intro is a later milestone. The current foundation starts directly in Hero and does not delay access to portfolio content.
 
 ## Failure and recovery states
 
-If an asset fails to load, the scene uses a neutral placeholder with the same reserved dimensions. If a transition fails to complete, a timeout or error boundary resolves to the destination section and unlocks navigation. Refreshing at a section should produce a stable section state rather than replaying an incomplete transition.
-
+If an asset fails to load, the scene uses a reserved-size placeholder. If a transition fails to complete, a guard timeout or error path resolves to the destination scene and unlocks navigation. Refreshing at a hash produces a stable scene rather than replaying an incomplete transition.

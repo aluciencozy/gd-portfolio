@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+# Portfolio in Motion
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A Vite + React + TypeScript portfolio foundation inspired by Geometry Dash-style scene transitions.
 
-Currently, two official plugins are available:
+The current implementation provides four controlled scenes:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Hero / Cube
+2. About / Ship
+3. Projects / Ball
+4. Contact / Wave
 
-## React Compiler
+Wheel input, touch swipes, keyboard commands, visible navigation, and browser hash navigation all use the same scene navigator. The environment moves horizontally inside a fixed viewport; the document itself does not become a horizontal scroll surface.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Commands
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm run dev
+npm run lint
+npm test
+npm run build
+npm run test:e2e
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Playwright requires a Chromium installation with its system dependencies. Use `npx playwright install-deps chromium` on a machine where sudo authentication is available.
+
+## Assets
+
+- Original supplied SVGs: `assets/`
+- Optimized web SVGs: `src/assets/`
+- Asset optimizer configuration: `svgo.config.mjs`
+- Asset manifest and rights notes: `docs/asset-manifest.md`
+
+The Contact scene includes a bounded gallery of all supplied assets. Supplied assets are attributed to RobTop Games; rights clearance is currently unverified.
+
+## Documentation
+
+The implementation plan and milestone packet live in [`docs/README.md`](docs/README.md).

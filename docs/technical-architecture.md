@@ -2,101 +2,93 @@
 
 ## Stack
 
-- Next.js with TypeScript.
-- Static export deployment.
+- Vite with React and TypeScript.
+- Tailwind CSS 4 through the Vite plugin, plus a small global stylesheet.
 - Motion for React for animation sequencing and transforms. See the [Motion `useAnimate` documentation](https://motion.dev/docs/react-use-animate).
-- CSS Modules for layout and scene styling.
-- Playwright for end-to-end testing.
-- Native browser scrolling, without Lenis or GSAP in the first version.
+- Vitest and Testing Library for unit/component tests.
+- Playwright for end-to-end and screenshot tests.
+- Static Vite output with no backend or runtime data dependency.
 
-GSAP may be added only if the authored transition timelines exceed Motion’s maintainability. That decision requires evidence from the implemented scenes and an architecture review. It is not part of the initial stack.
-
-The project remains a static portfolio unless a future requirement explicitly adds a backend.
+The first version does not use a router, GSAP, Lenis, or another scrolling library.
 
 ## Architectural shape
 
-The page is organized around semantic sections and a replaceable animation layer:
-
 ```text
-Page shell
-├── semantic section content
-│   ├── Hero
-│   ├── About
-│   ├── Projects
-│   └── Contact
-├── visible section navigation
-└── scene animation layer
+Portfolio shell
+├── semantic scene content
+│   ├── Hero / Cube
+│   ├── About / Ship
+│   ├── Projects / Ball
+│   └── Contact / Wave + asset gallery
+├── fixed navigation HUD
+├── controlled input adapter
+└── viewport scene layer
     ├── scene navigator
-    ├── transition orchestrator
+    ├── source-mode transition profiles
     ├── character renderer
     ├── portal and obstacle renderer
     └── asset loading and fallback
 ```
 
-Animation state must not own portfolio content. A visitor should be able to render and navigate the semantic sections with animation disabled.
+Animation state must not own portfolio content. Each scene remains a semantic section mounted in the DOM; inactive scenes are inert and visually hidden while the active scene owns the viewport.
 
 ## Core interface
-
-The navigation seam is intentionally small:
 
 ```ts
 type SceneId = "hero" | "about" | "projects" | "contact";
 
 interface SceneNavigator {
-  current: SceneId;
-  isTransitioning: boolean;
-  transitionTo(scene: SceneId): Promise<void>;
-  next(): Promise<void>;
-  previous(): Promise<void>;
+  getSnapshot(): SceneNavigatorSnapshot;
+  transitionTo(scene: SceneId): TransitionCommand | null;
+  next(): TransitionCommand | null;
+  previous(): TransitionCommand | null;
+  complete(): void;
+  recover(): void;
 }
 ```
 
-The concrete implementation owns validation, transition locking, one-request queuing, reduced-motion branching, and recovery to a stable destination state. Views request navigation through this seam rather than changing scene state directly.
+The concrete implementation owns validation, transition locking, direct navigation, ignored repeat input, and recovery to a stable destination state. Views request navigation through this seam rather than changing scene state directly.
 
 ## Module responsibilities
 
 ### Scene navigation
 
-Own the ordered scene list, current scene, transition lock, direct navigation rules, previous and next behavior, and input normalization. Connect scroll, buttons, keyboard, and touch events to one request path.
+Own the ordered scene list, current scene, transition lock, direct navigation rules, previous and next behavior, hash state, and input normalization. Wheel, touch, buttons, keyboard, and browser history all enter through the same request path.
 
 ### Transition orchestration
 
-Own the authored sequence for each source and destination pair. Coordinate the current section handoff, full-viewport scene, character motion, portal timing, destination arrival, cleanup, and unlock. Each transition should have an independently testable timeline and reset path.
+Own the shared phased timeline and data-driven source-mode profiles. Coordinate the current scene handoff, moving world, portal timing, destination arrival, cleanup, skip, and timeout recovery.
 
 ### Character rendering
 
-Render the active mode with stable dimensions, transform origins, accessible decorative semantics, and a placeholder fallback. Character assets should be visually crisp at common desktop resolutions and deliberately resized for mobile.
+Render the active mode with stable dimensions, decorative semantics, reserved space, and a fallback placeholder. Vector assets use responsive sizing so the same composition can be reviewed at desktop and mobile sizes.
 
 ### Portal and obstacle rendering
 
-Render portals, spikes, jump orbs, blocks, platforms, and other authored scene objects. Keep scene geometry and layering separate from timeline control so positions can be tuned without rewriting navigation behavior.
+Render portals, spikes, yellow orbs, blocks, and the background. Keep scene geometry and layering separate from timeline control so positions can be tuned without rewriting navigation behavior.
 
 ### Section content
 
-Render semantic Hero, About, Projects, and Contact content. Content components expose headings, paragraphs, links, buttons, project details, and contact actions independently from the scene animation.
-
-### Reduced-motion behavior
-
-Read the user’s motion preference, expose it to the animation layer, and provide a deterministic short-fade or direct-navigation path. The content and navigation API must remain identical.
+Render semantic Hero, About, Projects, and Contact content. Content components expose headings, paragraphs, links, buttons, and the temporary asset gallery independently from transition state.
 
 ### Asset loading and fallback behavior
 
-Load normalized web assets with reserved dimensions and predictable naming. A missing or failed asset must fall back to a neutral placeholder without collapsing layout or blocking navigation. Original source assets remain separate from optimized web assets.
+Load normalized web assets with reserved dimensions and predictable naming. A missing or failed asset falls back without collapsing layout or blocking navigation. Original source assets remain separate from optimized web assets.
 
 ## Scrolling and viewport behavior
 
-Use native browser scrolling in the first version. Normal document flow provides the section structure; a viewport-sized scene layer handles each transition. Avoid a custom scrolling abstraction until a real requirement demonstrates that native behavior cannot support the authored experience.
+The first implementation controls the viewport rather than allowing partial document scrolling. Wheel and touch events become one-scene requests. The Contact gallery opts into its own bounded scroll container and isolates its events from the scene navigator.
 
-The scene layer must not permanently capture scroll or pointer input. It may temporarily coordinate input during a transition, then return control to the destination section.
+The scene layer does not use a horizontal document or custom scrolling abstraction. Horizontal travel is simulated by translating the environment and portal track inside a fixed viewport.
 
 ## Static deployment
 
-Configure Next.js for a static export and verify that every intended route, metadata file, asset, and fallback works from the exported output. The first version should not depend on server-side rendering, API routes, or runtime data fetching.
+`vite build` produces the static `dist/` output. The application does not depend on server-side rendering, API routes, runtime data fetching, or framework-specific route handling.
 
 ## Testing strategy
 
-- Unit-level tests cover scene ordering, valid and invalid navigation, transition locking, one-request queuing, reduced-motion branching, and recovery.
-- Playwright tests exercise refresh, intro skip, visible navigation, keyboard navigation, touch-sized viewports, repeated input, and direct section access.
-- Visual review covers each authored transition, each idle pose, asset loading, responsive composition, and reduced-motion presentation.
-- Production build checks validate static export output and catch missing asset or route assumptions.
-
+- Unit tests cover scene ordering, valid and invalid navigation, transition locking, ignored repeated input, hash parsing, and recovery.
+- Testing Library covers HUD behavior, boundary controls, focus semantics, and asset-gallery behavior.
+- Playwright tests exercise refresh, skip, visible navigation, keyboard navigation, wheel/touch-sized viewports, repeated input, direct hashes, browser history, gallery scrolling, and screenshots.
+- Visual review covers every idle pose, transition layer, asset fallback, responsive composition, and Contact gallery.
+- Production build checks validate the static Vite output and catch missing asset assumptions.
