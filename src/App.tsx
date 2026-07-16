@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, type ReactElement } from 'react'
 import { NavigationHud, SceneStepControls } from './components/NavigationHud'
 import { PortfolioSection } from './components/PortfolioSection'
-import { sceneHash, sceneIdFromHash, SCENE_IDS, type SceneId } from './features/navigation/scene-navigator'
+import {
+  sceneHash,
+  sceneIdFromHash,
+  SCENE_IDS,
+  SCENE_MODE_BY_ID,
+  type SceneId,
+} from './features/navigation/scene-navigator'
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
 import { useSceneNavigator } from './features/navigation/use-scene-navigator'
 import { SceneBackdrop } from './features/scene/SceneBackdrop'
@@ -130,12 +136,12 @@ export default function App(): ReactElement {
       />
 
       <main className="relative z-10 h-full">
-        {SCENE_IDS.map((scene, index) => (
+        {SCENE_IDS.map((scene) => (
           <PortfolioSection
             id={scene}
             isActive={current === scene}
             key={scene}
-            mode={(['cube', 'ship', 'ball', 'wave'] as const)[index]}
+            mode={SCENE_MODE_BY_ID[scene]}
             onNavigate={navigateTo}
             onNext={navigateNext}
             onPrevious={navigatePrevious}

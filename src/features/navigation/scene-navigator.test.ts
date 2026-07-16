@@ -1,11 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import {
   createSceneNavigator,
+  SCENE_MODE_BY_ID,
   sceneHash,
   sceneIdFromHash,
 } from './scene-navigator'
 
 describe('scene navigator', () => {
+  it('centralizes the mode assigned to each scene', () => {
+    expect(SCENE_MODE_BY_ID).toEqual({
+      hero: 'cube',
+      about: 'ship',
+      projects: 'ball',
+      contact: 'wave',
+    })
+  })
+
   it('starts at Hero and creates a source-aware forward transition', () => {
     const navigator = createSceneNavigator()
 

@@ -153,9 +153,6 @@ export function PortfolioSection({
                 transition={idleTransition}
               />
             )}
-            <span className="absolute bottom-0 rounded-full border border-white/15 bg-black/25 px-4 py-2 text-xs font-bold tracking-[0.2em] text-white/60 uppercase backdrop-blur-sm">
-              Active mode: {mode}
-            </span>
           </div>
         </div>
 

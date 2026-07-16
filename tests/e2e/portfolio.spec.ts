@@ -14,7 +14,7 @@ test.describe('controlled portfolio scenes', () => {
 
     await expect(page.locator('[data-scene="about"]')).toBeVisible()
     await expect(page).toHaveURL(/#about$/)
-    await expect(page.getByText('Active mode: ship')).toBeVisible()
+    await expect(page.getByText(/Active mode:/)).toHaveCount(0)
   })
 
   test('animates direct navigation and browser history destinations', async ({ page }) => {
