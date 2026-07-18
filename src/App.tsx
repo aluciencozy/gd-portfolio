@@ -10,6 +10,7 @@ import {
 } from './features/navigation/scene-navigator'
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
 import { useSceneNavigator } from './features/navigation/use-scene-navigator'
+import { useOpeningSequence } from './features/opening/use-opening-sequence'
 import { SceneBackdrop } from './features/scene/SceneBackdrop'
 import { SceneGround } from './features/scene/SceneGround'
 
@@ -22,6 +23,7 @@ function getInitialScene(): SceneId {
 }
 
 export default function App(): ReactElement {
+  const initialScene = useRef<SceneId>(getInitialScene()).current
   const {
     activeTransition,
     complete,
@@ -32,7 +34,8 @@ export default function App(): ReactElement {
     recover,
     transitionTo,
     target,
-  } = useSceneNavigator(getInitialScene())
+  } = useSceneNavigator(initialScene)
+  const opening = useOpeningSequence(initialScene === 'hero')
   const shouldPushHistory = useRef(false)
 
   const startRequest = useCallback((request: () => boolean): void => {
@@ -55,7 +58,7 @@ export default function App(): ReactElement {
   )
 
   useControlledSceneInput({
-    isTransitioning,
+    isTransitioning: isTransitioning || opening.isActive,
     onNext: navigateNext,
     onPrevious: navigatePrevious,
     onScene: navigateTo,
@@ -93,7 +96,12 @@ export default function App(): ReactElement {
     const handlePopState = () => {
       const requestedScene = sceneIdFromHash(window.location.hash)
 
-      if (!requestedScene || requestedScene === current || isTransitioning) {
+      if (
+        !requestedScene ||
+        requestedScene === current ||
+        isTransitioning ||
+        opening.isActive
+      ) {
         window.history.replaceState(null, '', sceneHash(current))
         return
       }
@@ -104,7 +112,7 @@ export default function App(): ReactElement {
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [current, isTransitioning, transitionTo])
+  }, [current, isTransitioning, opening.isActive, transitionTo])
 
   useEffect(() => {
     if (!activeTransition) {
@@ -119,17 +127,30 @@ export default function App(): ReactElement {
   }, [activeTransition, recover])
 
   return (
-    <div className="app-shell">
-      <SceneBackdrop />
-      <SceneGround />
+    <div
+      className="app-shell"
+      data-opening={opening.isActive ? 'true' : 'false'}
+      data-opening-phase={opening.phase}
+      ref={opening.scope}
+    >
+      <div className="opening-background-camera" data-opening-camera>
+        <SceneBackdrop />
+        <SceneGround />
+      </div>
 
       <CheckpointProgress
+        aria-hidden={opening.isActive || undefined}
+        data-opening-progress
         current={current}
         target={target}
         onNavigate={navigateTo}
       />
 
-      <main className="route-stage" aria-live="polite">
+      <main
+        aria-hidden={opening.isActive || undefined}
+        aria-live="polite"
+        className="route-stage"
+      >
         <RouteStage
           current={current}
           onComplete={complete}
@@ -138,8 +159,10 @@ export default function App(): ReactElement {
         />
       </main>
 
-      <div className="cube-anchor">
-        <img alt="" className="cube-anchor__image" src={characterAssets.cube} />
+      <div className="opening-cube-camera" data-opening-camera>
+        <div className="cube-anchor" data-opening-cube>
+          <img alt="" className="cube-anchor__image" src={characterAssets.cube} />
+        </div>
       </div>
 
       <span className="sr-only">Current section: {SCENE_IDS.indexOf(current) + 1} of {SCENE_IDS.length}</span>

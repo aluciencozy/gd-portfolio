@@ -50,37 +50,67 @@ a {
   color: white;
 }
 
-.scene-backdrop {
+.opening-background-camera,
+.opening-cube-camera {
   position: fixed;
-  z-index: 0;
   inset: 0;
-  display: block;
   width: 100vw;
   height: 100svh;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.opening-background-camera {
+  z-index: 0;
+}
+
+.opening-cube-camera {
+  z-index: 15;
+}
+
+.app-shell[data-opening="true"] [data-opening-progress],
+.app-shell[data-opening="true"] [data-opening-eyebrow],
+.app-shell[data-opening="true"] [data-opening-heading],
+.app-shell[data-opening="true"] [data-opening-body] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.app-shell[data-opening="true"] [data-opening-progress] {
+  pointer-events: none;
+}
+
+.scene-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: -50svh -100svh;
+  display: block;
+  width: auto;
+  height: auto;
   background-color: rgb(2 6 23);
   background-position: 0 center;
   background-repeat: repeat-x;
-  background-size: auto 100%;
+  background-size: auto 100svh;
   animation: scene-backdrop-pan 36s linear infinite;
   filter: brightness(0.42) contrast(1.08);
-  will-change: background-position;
+  will-change: transform;
   pointer-events: none;
 }
 
 @keyframes scene-backdrop-pan {
   from {
-    background-position: 0 center;
+    transform: translate3d(0, 0, 0);
   }
 
   to {
-    background-position: -100svh center;
+    transform: translate3d(-100svh, 0, 0);
   }
 }
 
 .scene-backdrop-tint {
-  position: fixed;
+  position: absolute;
   z-index: 1;
-  inset: 0;
+  inset: -50svh -50vw;
   background: rgb(13 25 132);
   mix-blend-mode: color;
   opacity: 0.96;
@@ -88,12 +118,12 @@ a {
 }
 
 .scene-ground {
-  position: fixed;
+  position: absolute;
   z-index: 2;
-  right: 0;
+  right: -50vw;
   bottom: 0;
-  left: 0;
-  width: 100vw;
+  left: -50vw;
+  width: auto;
   height: var(--scene-ground-height);
   pointer-events: none;
 }
@@ -294,7 +324,7 @@ a {
 }
 
 .cube-anchor {
-  position: fixed;
+  position: absolute;
   z-index: 15;
   bottom: var(--scene-ground-height);
   left: clamp(1rem, 4vw, 4rem);

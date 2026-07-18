@@ -10,6 +10,7 @@ The current experience uses a full-viewport repeating PNG backdrop, a persistent
 npm run dev
 npm run lint
 npm run build
+npm run test:e2e
 npm run preview
 ```
 

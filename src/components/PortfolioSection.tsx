@@ -27,9 +27,15 @@ export const PortfolioSection = forwardRef<HTMLElement, PortfolioSectionProps>(
         tabIndex={-1}
       >
         <div className="route-content__panel">
-          <p className="route-content__eyebrow">{content.eyebrow}</p>
-          <h1 id={headingId}>{content.title}</h1>
-          <p className="route-content__body">{content.body}</p>
+          <p className="route-content__eyebrow" data-opening-eyebrow>
+            {content.eyebrow}
+          </p>
+          <h1 data-opening-heading id={headingId}>
+            {content.title}
+          </h1>
+          <p className="route-content__body" data-opening-body>
+            {content.body}
+          </p>
         </div>
       </section>
     )

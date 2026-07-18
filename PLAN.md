@@ -4,7 +4,15 @@
 
 Keep the four routes: Hero, About, Projects, and Contact. Replace the current portal and scene transition system with a persistent top progress bar, a persistent idle cube, and simple Motion-based route content handoffs.
 
-The opening cube-fall animation is deferred to a later pass. This pass opens directly in the settled state.
+Fresh Hero loads now open with a close-up cube-fall sequence before settling into the checkpoint navigation layout. Direct section links continue to open immediately in their settled state.
+
+## Opening Sequence
+
+- Start at 2.2x zoom with only the background, ground, and upright cube visible.
+- Drop the cube from above the viewport, add a restrained impact squash and single bounce, then pause after landing and after each asymmetrical left-right movement so it appears briefly confused before returning fluidly to center.
+- Zoom back to the exact settled composition, pause briefly, and then reveal the progress bar and Hero copy with staggered Motion transitions.
+- Lock navigation input until the sequence completes, and skip the sequence for non-Hero deep links.
+- Keep the timeline safe under React Strict Mode and use compositor-friendly transforms, opacity, and filters.
 
 ## Implementation Changes
 
@@ -51,7 +59,7 @@ The opening cube-fall animation is deferred to a later pass. This pass opens dir
 - Keep unused source assets in the repository but remove their imports, catalog entries, and rendered usage.
 - Remove the entire `docs/` directory.
 - Maintain this roadmap in the root `PLAN.md`.
-- Remove all existing unit tests, E2E tests, snapshots, Vitest and Playwright configuration, test scripts, and unused test dependencies. Update the lockfile through the package manager.
+- Keep focused Playwright coverage for the opening sequence and direct-link behavior. Avoid restoring obsolete tests for removed prototypes.
 - Update the README so it describes the checkpoint navigation prototype and only lists supported commands.
 
 ## Background and Validation
@@ -63,6 +71,6 @@ The opening cube-fall animation is deferred to a later pass. This pass opens dir
 
 ## Future Phases
 
-- Opening sequence: off-angle cube falls, rotates upright, bounces, touches the landing checkpoint, triggers its filled state, then the filled checkpoint flies continuously to the first top-bar marker while the cube arcs to bottom-left.
+- Checkpoint landing: extend the opening so the cube touches a landing checkpoint, triggers its filled state, and sends it to the first top-bar marker.
 - Cube guidance: keep the cube persistent and introduce an anchored speech card for dialogue.
 - Later polish: cube movement between sections, refined copy choreography, visual effects, and final portfolio content.
