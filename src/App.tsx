@@ -11,6 +11,7 @@ import {
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
 import { useSceneNavigator } from './features/navigation/use-scene-navigator'
 import { SceneBackdrop } from './features/scene/SceneBackdrop'
+import { SceneGround } from './features/scene/SceneGround'
 
 function getInitialScene(): SceneId {
   if (typeof window === 'undefined') {
@@ -120,7 +121,7 @@ export default function App(): ReactElement {
   return (
     <div className="app-shell">
       <SceneBackdrop />
-      <div aria-hidden="true" className="scene-overlay" />
+      <SceneGround />
 
       <CheckpointProgress
         current={current}

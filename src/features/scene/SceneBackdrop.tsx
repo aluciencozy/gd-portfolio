@@ -9,12 +9,15 @@ export function SceneBackdrop(): ReactElement {
   }
 
   return (
-    <img
-      aria-hidden="true"
-      className="scene-backdrop"
-      alt=""
-      onError={() => setFailed(true)}
-      src={backgroundAssets.background}
-    />
+    <>
+      <img
+        aria-hidden="true"
+        className="scene-backdrop"
+        alt=""
+        onError={() => setFailed(true)}
+        src={backgroundAssets.background}
+      />
+      <div aria-hidden="true" className="scene-backdrop-tint" />
+    </>
   )
 }

@@ -4,6 +4,7 @@ import checkpointUnfilledAsset from './checkpoints/unfilled.svg'
 import cubeAsset from './characters/cube.svg'
 import progressFillAsset from './ui/sliderBar-uhd.png'
 import progressGrooveAsset from './ui/slidergroove-uhd.png'
+import groundAsset from '../../assets/ground-square.png'
 
 export const characterAssets = {
   cube: cubeAsset,
@@ -11,6 +12,7 @@ export const characterAssets = {
 
 export const backgroundAssets = {
   background: backgroundAsset,
+  ground: groundAsset,
 } as const
 
 export const checkpointAssets = {

@@ -60,21 +60,75 @@ a {
   object-position: center;
   transform: scale(1.12);
   transform-origin: center;
+  filter: brightness(0.42) contrast(1.08);
+  pointer-events: none;
+}
+
+.scene-backdrop-tint {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  background: rgb(13 25 132);
+  mix-blend-mode: color;
+  opacity: 0.96;
   pointer-events: none;
 }
 
 .scene-backdrop--fallback {
   background:
-    radial-gradient(circle at 30% 20%, rgb(34 211 238 / 28%), transparent 36%),
-    linear-gradient(135deg, #0f172a, #020617);
+    radial-gradient(circle at 30% 20%, rgb(58 86 255 / 52%), transparent 36%),
+    linear-gradient(135deg, #1e32bd, #020a5e);
 }
 
-.scene-overlay {
+.scene-ground {
   position: fixed;
-  z-index: 1;
-  inset: 0;
-  background: rgb(2 6 23 / 35%);
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: clamp(6rem, 24svh, 18rem);
   pointer-events: none;
+}
+
+.scene-ground__image,
+.scene-ground__shade,
+.scene-ground__horizon {
+  position: absolute;
+  inset: 0;
+}
+
+.scene-ground__image {
+  background-position: center bottom;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  filter: brightness(0.28) sepia(1) saturate(6) hue-rotate(205deg) contrast(1.08);
+  opacity: 0.9;
+}
+
+.scene-ground__shade {
+  background: linear-gradient(
+    to bottom,
+    rgb(0 10 92 / 3%),
+    rgb(0 7 72 / 22%)
+  );
+  mix-blend-mode: multiply;
+}
+
+.scene-ground__horizon {
+  top: 0;
+  bottom: auto;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgb(235 240 255 / 30%) 6%,
+    rgb(235 240 255 / 92%) 15%,
+    rgb(235 240 255 / 92%) 85%,
+    rgb(235 240 255 / 30%) 94%,
+    transparent 100%
+  );
+  filter: drop-shadow(0 0 0.55rem rgb(162 177 255 / 88%));
 }
 
 .route-stage {
