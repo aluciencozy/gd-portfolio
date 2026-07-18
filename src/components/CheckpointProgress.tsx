@@ -12,8 +12,15 @@ interface CheckpointProgressProps extends HTMLAttributes<HTMLDivElement> {
   onNavigate: (scene: SceneId) => void
 }
 
-function progressForScene(scene: SceneId): number {
+function markerProgressForScene(scene: SceneId): number {
   return (SCENE_IDS.indexOf(scene) + 0.5) / SCENE_IDS.length
+}
+
+const sceneFillProgress: Record<SceneId, number> = {
+  hero: 0.25,
+  about: 0.5,
+  projects: 0.75,
+  contact: 1,
 }
 
 export function CheckpointProgress({
@@ -23,7 +30,7 @@ export function CheckpointProgress({
   ...rest
 }: CheckpointProgressProps): ReactElement {
   const destination = target ?? current
-  const destinationProgress = progressForScene(destination)
+  const destinationProgress = sceneFillProgress[destination]
 
   return (
     <div className="checkpoint-progress" {...rest}>
@@ -57,7 +64,7 @@ export function CheckpointProgress({
 
         {SCENE_IDS.map((scene) => {
           const isActive = scene === destination
-          const markerProgress = progressForScene(scene) * 100
+          const markerProgress = markerProgressForScene(scene) * 100
 
           return (
             <button

@@ -158,8 +158,11 @@ a {
 
 .checkpoint-progress__track {
   position: relative;
+  --checkpoint-display: none; /* Checkpoints are temporarily hidden. Set to block to restore them. */
   width: min(840px, calc(100vw - 4rem));
   aspect-ratio: 840 / 48;
+  transform: scale(0.8);
+  transform-origin: top center;
   pointer-events: auto;
 }
 
@@ -170,6 +173,10 @@ a {
   width: 100%;
   height: 100%;
   object-fit: fill;
+  filter:
+    drop-shadow(0 0 1px rgb(0 0 0 / 100%))
+    drop-shadow(0 0 1px rgb(0 0 0 / 100%))
+    drop-shadow(0 0.2rem 0.35rem rgb(0 0 0 / 28%));
   pointer-events: none;
 }
 
@@ -197,7 +204,7 @@ a {
   position: absolute;
   z-index: 2;
   top: calc(100% - 1px);
-  display: block;
+  display: var(--checkpoint-display);
   width: clamp(1.65rem, 3.3vw, 2.1rem);
   height: clamp(3rem, 5.25vw, 3.9rem);
   padding: 0;
