@@ -1,23 +1,12 @@
 export const SCENE_IDS = ['hero', 'about', 'projects', 'contact'] as const
 
 export type SceneId = (typeof SCENE_IDS)[number]
-export type SceneMode = 'cube' | 'ship' | 'ball' | 'wave'
 export type NavigationDirection = 'forward' | 'backward'
-
-export const SCENE_MODE_BY_ID = {
-  hero: 'cube',
-  about: 'ship',
-  projects: 'ball',
-  contact: 'wave',
-} as const satisfies Record<SceneId, SceneMode>
 
 export interface TransitionCommand {
   from: SceneId
   to: SceneId
   direction: NavigationDirection
-  sourceMode: SceneMode
-  destinationMode: SceneMode
-  portalMode: SceneMode
 }
 
 export interface SceneNavigatorSnapshot {
@@ -65,9 +54,6 @@ export function createSceneNavigator(initialScene: SceneId = 'hero'): SceneNavig
       from: snapshot.current,
       to: destination,
       direction,
-      sourceMode: SCENE_MODE_BY_ID[snapshot.current],
-      destinationMode: SCENE_MODE_BY_ID[destination],
-      portalMode: SCENE_MODE_BY_ID[destination],
     }
 
     setSnapshot({

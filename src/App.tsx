@@ -1,17 +1,16 @@
 import { useCallback, useEffect, useRef, type ReactElement } from 'react'
-import { NavigationHud, SceneStepControls } from './components/NavigationHud'
-import { PortfolioSection } from './components/PortfolioSection'
+import { CheckpointProgress } from './components/CheckpointProgress'
+import { RouteStage } from './components/RouteStage'
+import { characterAssets } from './assets/asset-catalog'
 import {
   sceneHash,
   sceneIdFromHash,
   SCENE_IDS,
-  SCENE_MODE_BY_ID,
   type SceneId,
 } from './features/navigation/scene-navigator'
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
 import { useSceneNavigator } from './features/navigation/use-scene-navigator'
 import { SceneBackdrop } from './features/scene/SceneBackdrop'
-import { TransitionScene } from './features/scene/TransitionScene'
 
 function getInitialScene(): SceneId {
   if (typeof window === 'undefined') {
@@ -22,9 +21,6 @@ function getInitialScene(): SceneId {
 }
 
 export default function App(): ReactElement {
-  const motionEnabled =
-    typeof window === 'undefined' ||
-    !new URLSearchParams(window.location.search).has('visualTest')
   const {
     activeTransition,
     complete,
@@ -33,8 +29,8 @@ export default function App(): ReactElement {
     next,
     previous,
     recover,
-    skip,
     transitionTo,
+    target,
   } = useSceneNavigator(getInitialScene())
   const shouldPushHistory = useRef(false)
 
@@ -95,6 +91,7 @@ export default function App(): ReactElement {
   useEffect(() => {
     const handlePopState = () => {
       const requestedScene = sceneIdFromHash(window.location.hash)
+
       if (!requestedScene || requestedScene === current || isTransitioning) {
         window.history.replaceState(null, '', sceneHash(current))
         return
@@ -115,57 +112,36 @@ export default function App(): ReactElement {
 
     const timeout = window.setTimeout(() => {
       recover()
-    }, 2600)
+    }, 3200)
 
     return () => window.clearTimeout(timeout)
   }, [activeTransition, recover])
 
   return (
-    <div className="relative isolate h-[100svh] overflow-hidden bg-slate-950 text-white selection:bg-cyan-300 selection:text-slate-950">
-      <SceneBackdrop
-        direction={activeTransition?.direction}
-        isTransitioning={isTransitioning}
-        motionEnabled={motionEnabled}
-      />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-slate-950/45" />
+    <div className="app-shell">
+      <SceneBackdrop />
+      <div aria-hidden="true" className="scene-overlay" />
 
-      <NavigationHud
+      <CheckpointProgress
         current={current}
-        isTransitioning={isTransitioning}
+        target={target}
         onNavigate={navigateTo}
       />
 
-      <main className="relative z-10 h-full">
-        {SCENE_IDS.map((scene) => (
-          <PortfolioSection
-            id={scene}
-            isActive={current === scene}
-            key={scene}
-            mode={SCENE_MODE_BY_ID[scene]}
-            onNavigate={navigateTo}
-            onNext={navigateNext}
-            onPrevious={navigatePrevious}
-            motionEnabled={motionEnabled}
-          />
-        ))}
-      </main>
-
-      <SceneStepControls
-        current={current}
-        isTransitioning={isTransitioning}
-        onNext={navigateNext}
-        onPrevious={navigatePrevious}
-      />
-
-      {activeTransition && (
-        <TransitionScene
-          key={`${activeTransition.from}-${activeTransition.to}`}
+      <main className="route-stage" aria-live="polite">
+        <RouteStage
+          current={current}
           onComplete={complete}
           onRecover={recover}
-          onSkip={skip}
           transition={activeTransition}
         />
-      )}
+      </main>
+
+      <div className="cube-anchor">
+        <img alt="" className="cube-anchor__image" src={characterAssets.cube} />
+      </div>
+
+      <span className="sr-only">Current section: {SCENE_IDS.indexOf(current) + 1} of {SCENE_IDS.length}</span>
     </div>
   )
 }
