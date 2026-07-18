@@ -43,6 +43,7 @@ a {
 .app-shell {
   position: relative;
   isolation: isolate;
+  --scene-ground-height: clamp(6rem, 15svh, 18rem);
   width: 100vw;
   height: 100svh;
   overflow: hidden;
@@ -93,7 +94,7 @@ a {
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: clamp(6rem, 24svh, 18rem);
+  height: var(--scene-ground-height);
   pointer-events: none;
 }
 
@@ -295,9 +296,9 @@ a {
 .cube-anchor {
   position: fixed;
   z-index: 15;
-  bottom: max(1rem, env(safe-area-inset-bottom));
+  bottom: var(--scene-ground-height);
   left: clamp(1rem, 4vw, 4rem);
-  width: clamp(6rem, 12vw, 10.25rem);
+  width: clamp(5rem, 10vw, 8.5rem);
   pointer-events: none;
 }
 
