@@ -56,12 +56,24 @@ a {
   display: block;
   width: 100vw;
   height: 100svh;
-  object-fit: cover;
-  object-position: center;
-  transform: scale(1.12);
-  transform-origin: center;
+  background-color: rgb(2 6 23);
+  background-position: 0 center;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  animation: scene-backdrop-pan 36s linear infinite;
   filter: brightness(0.42) contrast(1.08);
+  will-change: background-position;
   pointer-events: none;
+}
+
+@keyframes scene-backdrop-pan {
+  from {
+    background-position: 0 center;
+  }
+
+  to {
+    background-position: -100svh center;
+  }
 }
 
 .scene-backdrop-tint {
@@ -72,12 +84,6 @@ a {
   mix-blend-mode: color;
   opacity: 0.96;
   pointer-events: none;
-}
-
-.scene-backdrop--fallback {
-  background:
-    radial-gradient(circle at 30% 20%, rgb(58 86 255 / 52%), transparent 36%),
-    linear-gradient(135deg, #1e32bd, #020a5e);
 }
 
 .scene-ground {

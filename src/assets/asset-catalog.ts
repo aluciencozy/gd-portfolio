@@ -1,4 +1,4 @@
-import backgroundAsset from './backgrounds/background.svg'
+import backgroundAsset from '../../assets/background-png.png'
 import checkpointFilledAsset from './checkpoints/filled.svg'
 import checkpointUnfilledAsset from './checkpoints/unfilled.svg'
 import cubeAsset from './characters/cube.svg'

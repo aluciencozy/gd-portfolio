@@ -8,7 +8,7 @@ The opening cube-fall animation is deferred to a later pass. This pass opens dir
 
 ## Implementation Changes
 
-- Remove the deprecated transition overlay, portals, obstacles, extra characters, background motion, asset gallery, visible navbar, and Previous/Next controls.
+- Remove the deprecated transition overlay, portals, obstacles, extra characters, asset gallery, visible navbar, and Previous/Next controls.
 - Keep wheel, touch swipe, keyboard, hash navigation, and checkpoint button navigation. Endpoints do not wrap.
 - Keep route content minimal and centered: route label, title, and short body copy only.
 - Keep the cube globally mounted at the bottom-left, approximately `clamp(96px, 12vw, 164px)`, with no idle or route-change animation.
@@ -56,7 +56,7 @@ The opening cube-fall animation is deferred to a later pass. This pass opens dir
 
 ## Background and Validation
 
-- Make the background a static full-viewport layer using `100vw`, `100svh`, and `object-fit: cover`.
+- Use the supplied 2048px PNG as a full-viewport repeating backdrop. Scale each square tile to `100svh` with `background-size: auto 100%`, repeat it horizontally, and pan by one tile in a seamless loop so wide screens always remain covered.
 - Verify no horizontal or vertical black bars at desktop, mobile, narrow, and wide aspect ratios.
 - Reproduce the current transition and background issue in the running app as a visual baseline before editing.
 - Validate with lint, typecheck, build, and manual visual inspection of initial Hero, direct `#contact`, forward and backward navigation, checkpoint buttons, wheel, swipe, keyboard, endpoint behavior, marker crossfades, progress fill, content pause, responsive sizing, and absence of old assets.
