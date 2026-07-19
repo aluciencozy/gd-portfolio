@@ -6,7 +6,7 @@ interface ControlledSceneInputOptions {
   onNext: () => void
   onPrevious: () => void
   onScene: (scene: SceneId) => void
-  onInterrupt?: () => void
+  onKeyboardSkip?: () => void
 }
 
 const TOUCH_THRESHOLD = 16
@@ -31,7 +31,7 @@ export function useControlledSceneInput({
   onNext,
   onPrevious,
   onScene,
-  onInterrupt,
+  onKeyboardSkip,
 }: ControlledSceneInputOptions): void {
   const wheelReady = useRef(true)
   const wheelResetTimeout = useRef<number | null>(null)
@@ -59,7 +59,6 @@ export function useControlledSceneInput({
 
       wheelReady.current = false
       if (isTransitioning) {
-        onInterrupt?.()
         return
       }
 
@@ -90,11 +89,9 @@ export function useControlledSceneInput({
 
       if (!touchStartExempt && isSwipe) {
         event.preventDefault()
-        if (isTransitioning) {
-          onInterrupt?.()
-        } else if (deltaY < 0) {
+        if (!isTransitioning && deltaY < 0) {
           onNext()
-        } else {
+        } else if (!isTransitioning) {
           onPrevious()
         }
       }
@@ -123,7 +120,7 @@ export function useControlledSceneInput({
 
       if (isTransitioning && isNavigationKey) {
         event.preventDefault()
-        onInterrupt?.()
+        onKeyboardSkip?.()
         return
       }
 
@@ -155,5 +152,5 @@ export function useControlledSceneInput({
       window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isTransitioning, onInterrupt, onNext, onPrevious, onScene])
+  }, [isTransitioning, onKeyboardSkip, onNext, onPrevious, onScene])
 }

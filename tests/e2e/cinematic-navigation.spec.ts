@@ -47,6 +47,119 @@ async function resumeCurtain(curtain: Locator): Promise<void> {
   await curtain.evaluate((element) => element.getAnimations()[0]?.play())
 }
 
+interface GameplaySample {
+  elapsed: number
+  centerX: number
+  centerY: number
+  angle: number
+}
+
+async function collectGameplay(icon: Locator): Promise<GameplaySample[]> {
+  return icon.evaluate(
+    (element) =>
+      new Promise<GameplaySample[]>((resolve) => {
+        const startedAt = performance.now()
+        const samples: GameplaySample[] = []
+
+        const sample = (timestamp: number): void => {
+          const rect = element.getBoundingClientRect()
+          const trackRect = element.parentElement?.getBoundingClientRect() ?? rect
+          const transform = getComputedStyle(element).transform
+          const values = transform
+            .match(/matrix(?:3d)?\(([^)]+)\)/)?.[1]
+            ?.split(',')
+            .map(Number)
+          const angle = values
+            ? Math.atan2(values[1], values[0]) * (180 / Math.PI)
+            : 0
+
+          samples.push({
+            elapsed: timestamp - startedAt,
+            centerX: trackRect.left + trackRect.width / 2,
+            centerY: rect.top + rect.height / 2,
+            angle,
+          })
+
+          if (timestamp - startedAt >= 1_800) {
+            resolve(samples)
+            return
+          }
+
+          requestAnimationFrame(sample)
+        }
+
+        requestAnimationFrame(sample)
+      }),
+  )
+}
+
+function expectContinuousTravel(
+  samples: GameplaySample[],
+  viewportWidth: number,
+): void {
+  const positions = samples.map((sample) => sample.centerX)
+  const distance = Math.max(...positions) - Math.min(...positions)
+  const movingFrames = samples.filter((sample, index) => {
+    const previous = samples[index - 1]
+    return previous ? sample.centerX - previous.centerX > 0.2 : false
+  }).length
+
+  expect(distance).toBeGreaterThan(viewportWidth * 0.75)
+  expect(movingFrames).toBeGreaterThan(samples.length * 0.5)
+}
+
+function expectConstantSpeed(samples: GameplaySample[], viewportWidth: number): void {
+  expectContinuousTravel(samples, viewportWidth)
+
+  const speeds: number[] = []
+  samples.forEach((sample, index) => {
+    const previous = samples[index - 3]
+    if (
+      !previous ||
+      sample.elapsed < 200 ||
+      sample.elapsed > 1_400
+    ) {
+      return
+    }
+
+    const deltaTime = sample.elapsed - previous.elapsed
+    const deltaX = sample.centerX - previous.centerX
+    if (deltaTime > 0 && deltaX > 0.1) {
+      speeds.push(deltaX / deltaTime)
+    }
+  })
+
+  if (speeds.length > 10) {
+    expect(Math.min(...speeds)).toBeGreaterThan(0.3)
+    expect(Math.max(...speeds) / Math.min(...speeds)).toBeLessThan(2.25)
+  }
+}
+
+function waitForGameplayStart(page: Page): Promise<void> {
+  return page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const selector = '[data-gameplay-track][data-gameplay-active="true"]'
+        if (document.querySelector(selector)) {
+          resolve()
+          return
+        }
+
+        const observer = new MutationObserver(() => {
+          if (document.querySelector(selector)) {
+            observer.disconnect()
+            resolve()
+          }
+        })
+        observer.observe(document.body, {
+          attributes: true,
+          childList: true,
+          subtree: true,
+        })
+      }),
+  )
+}
+
 test('covers the old route before swapping to the destination', async ({
   page,
 }) => {
@@ -70,10 +183,6 @@ test('covers the old route before swapping to the destination', async ({
   await expect(page.locator('[data-scene="contact"]')).toBeAttached()
   await expect(cubeTransition.locator('[data-cinematic-icon]')).toBeVisible()
   await expect(cubeTransition).toHaveAttribute(
-    'data-cinematic-direction',
-    'forward',
-  )
-  await expect(cubeTransition).toHaveAttribute(
     'data-cinematic-phase',
     'gameplay',
     { timeout: 3_000 },
@@ -91,14 +200,10 @@ test('covers the old route before swapping to the destination', async ({
   const waveTransition = page.locator('.cinematic-transition')
   await expect(waveTransition).toHaveAttribute('data-cinematic-mode', 'wave')
   await expect(waveTransition).toHaveAttribute('data-cinematic-phase', 'cover')
-  await expect(waveTransition).toHaveAttribute(
-    'data-cinematic-direction',
-    'backward',
-  )
   const backwardCurtain = waveTransition.locator('[data-cinematic-curtain]')
   await pauseCurtainAtMidpoint(backwardCurtain)
-  expect(await curtainOwnsPoint(page, 64, 360)).toBe(false)
-  expect(await curtainOwnsPoint(page, 1216, 360)).toBe(true)
+  expect(await curtainOwnsPoint(page, 64, 360)).toBe(true)
+  expect(await curtainOwnsPoint(page, 1216, 360)).toBe(false)
   await resumeCurtain(backwardCurtain)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Selected work in progress.',
@@ -108,10 +213,33 @@ test('covers the old route before swapping to the destination', async ({
   await page.keyboard.press('ArrowLeft')
   await expect(page.locator('.cinematic-transition')).toHaveAttribute(
     'data-cinematic-mode',
-    'ship',
+    'wave',
   )
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'A little more about the maker.',
+    { timeout: 10_000 },
+  )
+})
+
+test('ignores wheel momentum while a transition is active', async ({ page }) => {
+  await openSettled(page, 'about')
+
+  await page.keyboard.press('ArrowRight')
+  const transition = page.locator('.cinematic-transition')
+  await expect(transition).toHaveAttribute('data-cinematic-phase', 'hold', {
+    timeout: 3_000,
+  })
+
+  await page.mouse.wheel(0, 600)
+  await expect(transition).not.toHaveAttribute(
+    'data-cinematic-phase',
+    'skip-reveal',
+  )
+  await expect(transition).toHaveAttribute('data-cinematic-phase', 'gameplay', {
+    timeout: 3_000,
+  })
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Selected work in progress.',
     { timeout: 10_000 },
   )
 })
@@ -240,4 +368,67 @@ test('acknowledges bounded endpoint input without changing scenes', async ({
   await expect(page).toHaveURL(/#contact$/)
   await expect(page.locator('.cinematic-transition')).toHaveCount(0)
   await expect(cube).toHaveAttribute('data-cube-reaction', '1')
+})
+
+test('keeps each gameplay icon moving at constant horizontal speed', async ({
+  page,
+}) => {
+  await openSettled(page, 'hero')
+
+  const cubeGameplayStarted = waitForGameplayStart(page)
+  await page.keyboard.press('ArrowRight')
+  let transition = page.locator('.cinematic-transition')
+  await expect(transition).toHaveAttribute('data-cinematic-mode', 'cube')
+  await cubeGameplayStarted
+  let icon = transition.locator('[data-gameplay-icon]')
+  const cubeSamples = await collectGameplay(icon)
+  expectConstantSpeed(cubeSamples, page.viewportSize()?.width ?? 1280)
+  const cubeVerticalRange =
+    Math.max(...cubeSamples.map((sample) => sample.centerY)) -
+    Math.min(...cubeSamples.map((sample) => sample.centerY))
+  expect(cubeVerticalRange).toBeGreaterThan(
+    (page.viewportSize()?.height ?? 720) * 0.2,
+  )
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'A little more about the maker.',
+    { timeout: 10_000 },
+  )
+
+  const shipGameplayStarted = waitForGameplayStart(page)
+  await page.keyboard.press('ArrowRight')
+  transition = page.locator('.cinematic-transition')
+  await expect(transition).toHaveAttribute('data-cinematic-mode', 'ship')
+  await shipGameplayStarted
+  icon = transition.locator('[data-gameplay-icon]')
+  expectConstantSpeed(
+    await collectGameplay(icon),
+    page.viewportSize()?.width ?? 1280,
+  )
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Selected work in progress.',
+    { timeout: 10_000 },
+  )
+
+  const waveGameplayStarted = waitForGameplayStart(page)
+  await page.keyboard.press('ArrowRight')
+  transition = page.locator('.cinematic-transition')
+  await expect(transition).toHaveAttribute('data-cinematic-mode', 'wave')
+  await waveGameplayStarted
+  icon = transition.locator('[data-gameplay-icon]')
+  const waveSamples = await collectGameplay(icon)
+  expectConstantSpeed(waveSamples, page.viewportSize()?.width ?? 1280)
+  const waveAngleDelta = waveSamples.reduce((largestDelta, sample, index) => {
+    const previous = waveSamples[index - 1]
+    if (!previous) {
+      return largestDelta
+    }
+
+    const delta = Math.abs(sample.angle - previous.angle)
+    return Math.max(largestDelta, Math.min(delta, 360 - delta))
+  }, 0)
+  expect(waveAngleDelta).toBeGreaterThan(80)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Let’s make contact.',
+    { timeout: 10_000 },
+  )
 })

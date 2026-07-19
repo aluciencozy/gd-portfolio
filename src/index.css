@@ -452,33 +452,42 @@ a {
   inset: -50svh -100svh;
 }
 
-.cinematic-character {
+.cinematic-character-track {
   position: absolute;
   z-index: 6;
   left: 0;
   display: block;
   visibility: hidden;
+  will-change: transform;
+}
+
+.cinematic-character {
+  display: block;
   filter: drop-shadow(0 1rem 1.2rem rgb(0 0 0 / 42%));
   will-change: transform;
 }
 
-.cinematic-transition[data-cinematic-direction="backward"]
-  .cinematic-character {
-  scale: -1 1;
+.cinematic-character-track--cube {
+  bottom: var(--scene-ground-height);
 }
 
 .cinematic-character--cube {
-  bottom: var(--scene-ground-height);
   width: clamp(7.5rem, 18svh, 13rem);
 }
 
-.cinematic-character--ship {
+.cinematic-character-track--ship {
   top: 48%;
+}
+
+.cinematic-character--ship {
   width: clamp(10rem, 24svh, 17rem);
 }
 
-.cinematic-character--wave {
+.cinematic-character-track--wave {
   top: 45%;
+}
+
+.cinematic-character--wave {
   width: clamp(8rem, 20svh, 14rem);
 }
 
@@ -512,12 +521,6 @@ a {
   width: 100%;
   height: 100%;
   overflow: visible;
-}
-
-.cinematic-transition[data-cinematic-direction="backward"]
-  .cinematic-hazards {
-  transform: scaleX(-1);
-  transform-origin: center;
 }
 
 .cinematic-hazard-mass {

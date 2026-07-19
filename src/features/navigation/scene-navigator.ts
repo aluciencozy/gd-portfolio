@@ -6,7 +6,6 @@ export type NavigationDirection = 'forward' | 'backward'
 export interface TransitionCommand {
   from: SceneId
   to: SceneId
-  direction: NavigationDirection
 }
 
 export interface SceneNavigatorSnapshot {
@@ -47,13 +46,9 @@ export function createSceneNavigator(initialScene: SceneId = 'hero'): SceneNavig
       return null
     }
 
-    const currentIndex = SCENE_IDS.indexOf(snapshot.current)
-    const destinationIndex = SCENE_IDS.indexOf(destination)
-    const direction = destinationIndex > currentIndex ? 'forward' : 'backward'
     const command: TransitionCommand = {
       from: snapshot.current,
       to: destination,
-      direction,
     }
 
     setSnapshot({

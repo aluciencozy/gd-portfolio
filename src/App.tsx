@@ -122,7 +122,7 @@ export default function App(): ReactElement {
 
   useControlledSceneInput({
     isTransitioning: isTransitioning || opening.isActive,
-    onInterrupt: isTransitioning ? finishCurrentTransition : undefined,
+    onKeyboardSkip: isTransitioning ? finishCurrentTransition : undefined,
     onNext: navigateNext,
     onPrevious: navigatePrevious,
     onScene: navigateTo,
@@ -201,18 +201,6 @@ export default function App(): ReactElement {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [current, isTransitioning, opening.isActive, transitionTo])
 
-  useEffect(() => {
-    if (!activeTransition) {
-      return
-    }
-
-    const timeout = window.setTimeout(() => {
-      recover()
-    }, 10_000)
-
-    return () => window.clearTimeout(timeout)
-  }, [activeTransition, recover])
-
   const coverDestination = useCallback(() => {
     if (activeTransition) {
       setDisplayScene(activeTransition.to)
@@ -244,7 +232,6 @@ export default function App(): ReactElement {
     <div
       className="app-shell"
       data-cinematic-active={isTransitioning ? 'true' : 'false'}
-      data-cinematic-direction={activeTransition?.direction}
       data-cinematic-skip={
         isTransitioning && skipTransitions ? 'true' : 'false'
       }

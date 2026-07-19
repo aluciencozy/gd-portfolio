@@ -2,7 +2,9 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests/e2e',
-  fullyParallel: true,
+  // Cinematic assertions sample real-time animation frames.
+  fullyParallel: false,
+  workers: 1,
   reporter: 'line',
   use: {
     baseURL: 'http://127.0.0.1:4173',

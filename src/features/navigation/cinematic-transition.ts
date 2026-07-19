@@ -1,8 +1,4 @@
-import type {
-  NavigationDirection,
-  SceneId,
-  TransitionCommand,
-} from './scene-navigator'
+import type { SceneId, TransitionCommand } from './scene-navigator'
 
 export const CINEMATIC_MODES = ['cube', 'ship', 'wave'] as const
 
@@ -23,31 +19,16 @@ export interface CinematicTransitionIntent extends TransitionCommand {
   mode: CinematicMode
 }
 
-export function modeForDeparture(
-  from: SceneId,
-  direction: NavigationDirection,
-): CinematicMode {
-  if (direction === 'forward') {
-    if (from === 'hero') {
-      return 'cube'
-    }
-
-    if (from === 'about') {
-      return 'ship'
-    }
-
-    return 'wave'
+export function modeForDeparture(from: SceneId): CinematicMode {
+  if (from === 'hero') {
+    return 'cube'
   }
 
-  if (from === 'contact') {
-    return 'wave'
-  }
-
-  if (from === 'projects') {
+  if (from === 'about') {
     return 'ship'
   }
 
-  return 'cube'
+  return 'wave'
 }
 
 export function createCinematicIntent(
@@ -55,6 +36,6 @@ export function createCinematicIntent(
 ): CinematicTransitionIntent {
   return {
     ...command,
-    mode: modeForDeparture(command.from, command.direction),
+    mode: modeForDeparture(command.from),
   }
 }

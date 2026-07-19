@@ -52,18 +52,12 @@ const CONTENT_DURATION = 0.45
 const SKIP_REVEAL_DURATION = 0.35
 const EASE_OUT = [0.22, 1, 0.36, 1] as const
 const CURTAIN_EASE = [0.65, 0, 0.35, 1] as const
+const STEP_END = (progress: number): number => (progress >= 1 ? 1 : 0)
 
 const CURTAIN_CLIPS = {
-  forward: {
-    start: 'polygon(-112% 0, -12% 0, 0% 100%, -100% 100%)',
-    covered: 'polygon(-12% 0, 100% 0, 112% 100%, 0% 100%)',
-    end: 'polygon(100% 0, 212% 0, 224% 100%, 112% 100%)',
-  },
-  backward: {
-    start: 'polygon(100% 0, 212% 0, 200% 100%, 88% 100%)',
-    covered: 'polygon(0% 0, 112% 0, 100% 100%, -12% 100%)',
-    end: 'polygon(-112% 0, 0% 0, -12% 100%, -124% 100%)',
-  },
+  start: 'polygon(-112% 0, -12% 0, 0% 100%, -100% 100%)',
+  covered: 'polygon(-12% 0, 100% 0, 112% 100%, 0% 100%)',
+  end: 'polygon(100% 0, 212% 0, 224% 100%, 112% 100%)',
 } as const
 
 function createInterruptSignal(): InterruptSignal {
@@ -171,7 +165,7 @@ export const CinematicTransition = forwardRef<
   forwardedRef,
 ): ReactElement {
   const intent = createCinematicIntent(command)
-  const clips = CURTAIN_CLIPS[intent.direction]
+  const clips = CURTAIN_CLIPS
   const [scope, animate] = useAnimate<HTMLDivElement>()
   const [phase, setPhase] = useState<CinematicPhase>(
     skipTransition ? 'skip-reveal' : 'cover',
@@ -406,32 +400,44 @@ export const CinematicTransition = forwardRef<
     }
 
     const runGameplay = async (): Promise<boolean> => {
+      const track = root.querySelector<HTMLElement>('[data-gameplay-track]')
       const icon = root.querySelector<HTMLElement>('[data-gameplay-icon]')
-      if (!icon) {
+      if (!track || !icon) {
         return false
       }
 
       const width = window.innerWidth
       const height = window.innerHeight
-      const direction = intent.direction === 'forward' ? 1 : -1
-      const startX = direction === 1 ? -width * 0.2 : width * 1.2
-      const endX = direction === 1 ? width * 1.2 : -width * 0.2
+      const startX = -width * 0.2
+      const endX = width * 1.2
+      const trackTransition = {
+        at: 0,
+        duration: GAMEPLAY_DURATION,
+        ease: 'linear' as const,
+      }
+      track.dataset.gameplayActive = 'true'
+      track.style.visibility = 'visible'
       icon.style.visibility = 'visible'
+      const playGameplay = async (
+        sequence: AnimationSequence,
+      ): Promise<boolean> => {
+        const completed = await play(sequence)
+        delete track.dataset.gameplayActive
+        return completed
+      }
 
       if (intent.mode === 'cube') {
-        return play([
+        return playGameplay([
+          [
+            track,
+            { x: [startX, endX] },
+            trackTransition,
+          ],
           [
             icon,
             {
-              x: [startX, width * 0.32, width * 0.53, width * 0.72, endX],
-              y: [0, 0, -Math.min(height * 0.26, 220), 0, 0],
-              rotate: [
-                0,
-                0,
-                direction * 180,
-                direction * 360,
-                direction * 360,
-              ],
+              y: [0, 0, -Math.min(height * 0.36, 320), 0, 0],
+              rotate: [0, 0, 180, 360, 360],
               scaleX: [1, 0.92, 1, 1.08, 1],
               scaleY: [1, 1.08, 1, 0.92, 1],
             },
@@ -439,24 +445,30 @@ export const CinematicTransition = forwardRef<
               duration: GAMEPLAY_DURATION,
               ease: 'linear',
               times: [0, 0.28, 0.5, 0.72, 1],
+              at: 0,
             },
           ],
         ])
       }
 
       if (intent.mode === 'ship') {
-        return play([
+        return playGameplay([
+          [
+            track,
+            { x: [startX, endX] },
+            trackTransition,
+          ],
           [
             icon,
             {
-              x: [startX, (startX + endX) / 2, endX],
               y: [height * 0.2, 0, -height * 0.2],
-              rotate: [-direction * 12, -direction * 25, -direction * 12],
+              rotate: [-12, -25, -12],
             },
             {
               duration: GAMEPLAY_DURATION,
               ease: 'easeInOut',
               times: [0, 0.5, 1],
+              at: 0,
             },
           ],
         ])
@@ -469,37 +481,32 @@ export const CinematicTransition = forwardRef<
         height * 0.24,
         -height * 0.16,
       ]
-      if (direction === -1) {
-        waveY.reverse()
-      }
-      const waveX = [0, 0.25, 0.5, 0.75, 1].map(
-        (progress) => startX + (endX - startX) * progress,
-      )
-
-      return play([
+      return playGameplay([
+        [
+          track,
+          { x: [startX, endX] },
+          trackTransition,
+        ],
         [
           icon,
           {
-            x: waveX,
             y: waveY,
-            rotate: waveY.map((_, index) => {
-              if (index === waveY.length - 1) {
-                return direction === 1 ? -43 : 223
-              }
-              const movingDown = waveY[index + 1] > waveY[index]
-              return movingDown
-                ? direction === 1
-                  ? 43
-                  : 137
-                : direction === 1
-                  ? -43
-                  : 223
-            }),
           },
           {
             duration: GAMEPLAY_DURATION,
             ease: 'linear',
             times: [0, 0.25, 0.5, 0.75, 1],
+            at: 0,
+          },
+        ],
+        [
+          icon,
+          { rotate: [45, -45, 45, -45, -45] },
+          {
+            duration: GAMEPLAY_DURATION,
+            ease: STEP_END,
+            times: [0, 0.25, 0.5, 0.75, 1],
+            at: 0,
           },
         ],
         [
@@ -580,6 +587,7 @@ export const CinematicTransition = forwardRef<
 
         curtain.style.visibility = 'hidden'
         setPhase('gameplay')
+        await nextFrame()
         if (!(await runGameplay())) {
           await runShortReveal()
           return
@@ -652,7 +660,6 @@ export const CinematicTransition = forwardRef<
   }, [
     animate,
     clips,
-    intent.direction,
     intent.mode,
     onComplete,
     onCovered,
@@ -665,7 +672,6 @@ export const CinematicTransition = forwardRef<
     <div
       aria-hidden="true"
       className="cinematic-transition"
-      data-cinematic-direction={intent.direction}
       data-cinematic-mode={intent.mode}
       data-cinematic-phase={phase}
       ref={scope}
@@ -676,12 +682,17 @@ export const CinematicTransition = forwardRef<
             <SceneBackdrop />
             {intent.mode === 'cube' && <SceneGround />}
             <ModeObstacles mode={intent.mode} />
-            <img
-              alt=""
-              className={`cinematic-character cinematic-character--${intent.mode}`}
-              data-gameplay-icon
-              src={characterAssets[intent.mode]}
-            />
+            <div
+              className={`cinematic-character-track cinematic-character-track--${intent.mode}`}
+              data-gameplay-track
+            >
+              <img
+                alt=""
+                className={`cinematic-character cinematic-character--${intent.mode}`}
+                data-gameplay-icon
+                src={characterAssets[intent.mode]}
+              />
+            </div>
           </div>
 
           <div className="cinematic-curtain" data-cinematic-curtain>
