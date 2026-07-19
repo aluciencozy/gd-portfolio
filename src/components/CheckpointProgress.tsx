@@ -7,6 +7,7 @@ import {
 import { SCENE_IDS, type SceneId } from '../features/navigation/scene-navigator'
 
 interface CheckpointProgressProps extends HTMLAttributes<HTMLDivElement> {
+  animateTransitions: boolean
   current: SceneId
   target: SceneId | null
   onNavigate: (scene: SceneId) => void
@@ -24,6 +25,7 @@ const sceneFillProgress: Record<SceneId, number> = {
 }
 
 export function CheckpointProgress({
+  animateTransitions,
   current,
   onNavigate,
   target,
@@ -40,19 +42,30 @@ export function CheckpointProgress({
         role="group"
       >
         <div className="checkpoint-progress__fill-clip">
-          <motion.div
-            aria-hidden="true"
-            className="checkpoint-progress__fill"
-            initial={false}
-            animate={{
-              clipPath: `inset(0 ${100 - destinationProgress * 100}% 0 0)`,
-            }}
-            style={{ backgroundImage: `url(${progressAssets.fill})` }}
-            transition={{
-              duration: 0.55,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          />
+          {animateTransitions ? (
+            <motion.div
+              aria-hidden="true"
+              className="checkpoint-progress__fill"
+              initial={false}
+              animate={{
+                clipPath: `inset(0 ${100 - destinationProgress * 100}% 0 0)`,
+              }}
+              style={{ backgroundImage: `url(${progressAssets.fill})` }}
+              transition={{
+                duration: 0.55,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="checkpoint-progress__fill"
+              style={{
+                backgroundImage: `url(${progressAssets.fill})`,
+                clipPath: `inset(0 ${100 - destinationProgress * 100}% 0 0)`,
+              }}
+            />
+          )}
         </div>
 
         <img
@@ -78,29 +91,48 @@ export function CheckpointProgress({
               type="button"
               style={{ left: `${markerProgress}%` }}
             >
-              <motion.img
-                alt=""
-                className="checkpoint-progress__marker-image"
-                initial={false}
-                animate={{ opacity: isActive ? 0 : 1 }}
-                src={checkpointAssets.unfilled}
-                transition={{
-                  delay: isActive ? 0.16 : 0,
-                  duration: 0.3,
-                  ease: 'easeInOut',
-                }}
-              />
-              <motion.img
-                alt=""
-                className="checkpoint-progress__marker-image checkpoint-progress__marker-image--filled"
-                initial={false}
-                animate={{ opacity: isActive ? 1 : 0 }}
-                src={checkpointAssets.filled}
-                transition={{
-                  duration: 0.45,
-                  ease: 'easeInOut',
-                }}
-              />
+              {animateTransitions ? (
+                <>
+                  <motion.img
+                    alt=""
+                    className="checkpoint-progress__marker-image"
+                    initial={false}
+                    animate={{ opacity: isActive ? 0 : 1 }}
+                    src={checkpointAssets.unfilled}
+                    transition={{
+                      delay: isActive ? 0.16 : 0,
+                      duration: 0.3,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                  <motion.img
+                    alt=""
+                    className="checkpoint-progress__marker-image checkpoint-progress__marker-image--filled"
+                    initial={false}
+                    animate={{ opacity: isActive ? 1 : 0 }}
+                    src={checkpointAssets.filled}
+                    transition={{
+                      duration: 0.45,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <img
+                    alt=""
+                    className="checkpoint-progress__marker-image"
+                    src={checkpointAssets.unfilled}
+                    style={{ opacity: isActive ? 0 : 1 }}
+                  />
+                  <img
+                    alt=""
+                    className="checkpoint-progress__marker-image checkpoint-progress__marker-image--filled"
+                    src={checkpointAssets.filled}
+                    style={{ opacity: isActive ? 1 : 0 }}
+                  />
+                </>
+              )}
             </button>
           )
         })}

@@ -1,4 +1,10 @@
-import { useCallback, useRef, useState, useSyncExternalStore } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import {
   createSceneNavigator,
   type SceneId,
@@ -19,7 +25,10 @@ export interface UseSceneNavigatorResult {
   skip: () => void
 }
 
-export function useSceneNavigator(initialScene: SceneId): UseSceneNavigatorResult {
+export function useSceneNavigator(
+  initialScene: SceneId,
+  animateTransitions = true,
+): UseSceneNavigatorResult {
   const navigatorRef = useRef<SceneNavigator | null>(null)
   if (!navigatorRef.current) {
     navigatorRef.current = createSceneNavigator(initialScene)
@@ -36,27 +45,46 @@ export function useSceneNavigator(initialScene: SceneId): UseSceneNavigatorResul
   )
 
   const begin = useCallback(
-    (command: TransitionCommand | null) => {
+    (command: TransitionCommand | null, animate: boolean) => {
       if (!command) {
         return false
+      }
+
+      if (!animate) {
+        navigator.complete()
+        setActiveTransition(null)
+        return true
       }
 
       setActiveTransition(command)
       return true
     },
-    [],
+    [navigator],
   )
 
   const transitionTo = useCallback(
-    (scene: SceneId) => begin(navigator.transitionTo(scene)),
-    [begin, navigator],
+    (scene: SceneId) =>
+      begin(navigator.transitionTo(scene), animateTransitions),
+    [animateTransitions, begin, navigator],
   )
 
-  const next = useCallback(() => begin(navigator.next()), [begin, navigator])
-  const previous = useCallback(
-    () => begin(navigator.previous()),
-    [begin, navigator],
+  const next = useCallback(
+    () => begin(navigator.next(), animateTransitions),
+    [animateTransitions, begin, navigator],
   )
+  const previous = useCallback(
+    () => begin(navigator.previous(), animateTransitions),
+    [animateTransitions, begin, navigator],
+  )
+
+  useEffect(() => {
+    if (animateTransitions || !snapshot.isTransitioning) {
+      return
+    }
+
+    navigator.complete()
+    setActiveTransition(null)
+  }, [animateTransitions, navigator, snapshot.isTransitioning])
 
   const complete = useCallback(() => {
     navigator.complete()

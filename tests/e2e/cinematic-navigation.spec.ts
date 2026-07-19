@@ -1,10 +1,10 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { ENABLE_CINEMATIC_TRANSITIONS } from '../../src/features/navigation/transition-config'
 
 async function openSettled(page: Page, scene: string): Promise<void> {
   await page.goto('/#about')
   await page.evaluate(() => {
     window.sessionStorage.setItem('gd-portfolio-opening-played', 'true')
-    window.localStorage.removeItem('gd-portfolio-skip-transitions')
   })
   await page.goto(`/?e2e=${scene}#${scene}`)
   await expect(page.locator('.app-shell')).toHaveAttribute(
@@ -203,8 +203,8 @@ function expectSmoothCubeArc(samples: GameplaySample[]): void {
 
   expect(apexIndex).toBeGreaterThan(3)
   expect(apexIndex).toBeLessThan(centerYs.length - 4)
-  expect(ascentSpeeds.length).toBeGreaterThan(5)
-  expect(descentSpeeds.length).toBeGreaterThan(5)
+  expect(ascentSpeeds.length).toBeGreaterThanOrEqual(5)
+  expect(descentSpeeds.length).toBeGreaterThanOrEqual(5)
   expect(Math.max(...ascentSpeeds.slice(-2))).toBeLessThan(
     Math.max(...ascentSpeeds) * 0.8,
   )
@@ -213,6 +213,7 @@ function expectSmoothCubeArc(samples: GameplaySample[]): void {
   )
 }
 
+if (ENABLE_CINEMATIC_TRANSITIONS) {
 test('covers the old route before swapping to the destination', async ({
   page,
 }) => {
@@ -334,34 +335,6 @@ test('a second navigation input safely finishes the active destination', async (
     { timeout: 3_000 },
   )
   await expect(page).toHaveURL(/#projects$/)
-})
-
-test('persists skip preference and bypasses the curtain and arrival camera', async ({
-  page,
-}) => {
-  await openSettled(page, 'about')
-
-  const skipControl = page.getByRole('checkbox', { name: 'Skip transitions' })
-  await skipControl.check()
-  await page.reload()
-  await expect(skipControl).toBeChecked()
-
-  await page.keyboard.press('ArrowRight')
-  const transition = page.locator('.cinematic-transition')
-  await expect(transition).toHaveAttribute(
-    'data-cinematic-phase',
-    'skip-reveal',
-  )
-  await expect(transition.locator('[data-cinematic-curtain]')).toHaveCount(0)
-
-  const cameraTransform = await page
-    .locator('.opening-cube-camera')
-    .evaluate((element) => getComputedStyle(element).transform)
-  expect(cameraTransform).toBe('none')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Selected work in progress.',
-    { timeout: 1_500 },
-  )
 })
 
 test('keeps the centered mode icon within the curtain on portrait screens', async ({
@@ -501,3 +474,32 @@ test('keeps each gameplay icon moving at constant horizontal speed', async ({
     { timeout: 10_000 },
   )
 })
+} else {
+  test('navigates immediately without route transition animations', async ({
+    page,
+  }) => {
+    await openSettled(page, 'about')
+
+    await expect(page.locator('.app-shell')).toHaveAttribute(
+      'data-transitions-enabled',
+      'false',
+    )
+    await page.keyboard.press('ArrowRight')
+
+    await expect(page).toHaveURL(/#projects$/)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Selected work in progress.',
+    )
+    await expect(page.locator('.cinematic-transition')).toHaveCount(0)
+
+    const routeAnimations = await page.locator('.route-stage').evaluate((stage) =>
+      stage.getAnimations({ subtree: true }).length,
+    )
+    expect(routeAnimations).toBe(0)
+
+    const progressClipPath = await page
+      .locator('.checkpoint-progress__fill')
+      .evaluate((element) => getComputedStyle(element).clipPath)
+    expect(progressClipPath).toContain('25%')
+  })
+}

@@ -2,9 +2,9 @@
 
 A Vite + React + TypeScript portfolio prototype built around four controlled checkpoints: Hero, About, Projects, and Contact.
 
-The current experience uses a full-viewport repeating PNG backdrop, a persistent animated cube, a top progress bar, and cinematic curtain wipes between sections. Once the black curtain covers the outgoing section, it swaps the route and briefly presents the cube, ship, or wave owned by the departure section. The curtain opens into the matching gameplay sequence, then closes again before revealing the destination cube close-up, smooth pullback, and text.
+The current experience uses a full-viewport repeating PNG backdrop, a persistent animated cube, and a top progress bar. Route transition choreography is temporarily disabled while the portfolio content is being built. Set `ENABLE_CINEMATIC_TRANSITIONS` in `src/features/navigation/transition-config.ts` to `true` to restore it.
 
-Wheel input, touch swipes, keyboard commands, checkpoint buttons, and browser hash navigation use the same bounded scene navigator. The document itself does not become a scroll surface. Direct links remain immediate, the opening plays once per tab session, and every cinematic uses the same left-to-right choreography. Wheel and touch input wait for an active transition to finish; a fresh keyboard navigation command can finish it early, and visitors can also persistently skip the curtain and arrival while retaining a short text reveal.
+Wheel input, touch swipes, keyboard commands, checkpoint buttons, and browser hash navigation use the same bounded scene navigator. The document itself does not become a scroll surface. Direct links remain immediate and the opening plays once per tab session. With route transitions disabled, navigation changes sections immediately while leaving the opening animation intact.
 
 ## Commands
 

@@ -19,7 +19,6 @@ import { SceneGround } from '../features/scene/SceneGround'
 
 interface CinematicTransitionProps {
   command: TransitionCommand
-  skipTransition: boolean
   onCovered: () => void
   onComplete: () => void
   onRecover: () => void
@@ -165,7 +164,6 @@ export const CinematicTransition = forwardRef<
 >(function CinematicTransition(
   {
     command,
-    skipTransition,
     onCovered,
     onComplete,
     onRecover,
@@ -175,9 +173,7 @@ export const CinematicTransition = forwardRef<
   const intent = createCinematicIntent(command)
   const clips = CURTAIN_CLIPS
   const [scope, animate] = useAnimate<HTMLDivElement>()
-  const [phase, setPhase] = useState<CinematicPhase>(
-    skipTransition ? 'skip-reveal' : 'cover',
-  )
+  const [phase, setPhase] = useState<CinematicPhase>('cover')
   const activeAnimation = useRef<{ stop: () => void } | null>(null)
   const interruptSignal = useRef<InterruptSignal>(createInterruptSignal())
   const interruptRequested = useRef(false)
@@ -539,11 +535,6 @@ export const CinematicTransition = forwardRef<
 
     const run = async (): Promise<void> => {
       try {
-        if (skipTransition) {
-          await runShortReveal()
-          return
-        }
-
         const curtain = root.querySelector<HTMLElement>(
           '[data-cinematic-curtain]',
         )
@@ -685,7 +676,6 @@ export const CinematicTransition = forwardRef<
     onCovered,
     onRecover,
     scope,
-    skipTransition,
   ])
 
   return (
@@ -696,35 +686,33 @@ export const CinematicTransition = forwardRef<
       data-cinematic-phase={phase}
       ref={scope}
     >
-      {!skipTransition && (
-        <>
-          <div className="cinematic-transition__scene" data-cinematic-scene>
-            <SceneBackdrop />
-            {intent.mode === 'cube' && <SceneGround />}
-            <ModeObstacles mode={intent.mode} />
-            <div
-              className={`cinematic-character-track cinematic-character-track--${intent.mode}`}
-              data-gameplay-track
-            >
-              <img
-                alt=""
-                className={`cinematic-character cinematic-character--${intent.mode}`}
-                data-gameplay-icon
-                src={characterAssets[intent.mode]}
-              />
-            </div>
-          </div>
-
-          <div className="cinematic-curtain" data-cinematic-curtain>
+      <>
+        <div className="cinematic-transition__scene" data-cinematic-scene>
+          <SceneBackdrop />
+          {intent.mode === 'cube' && <SceneGround />}
+          <ModeObstacles mode={intent.mode} />
+          <div
+            className={`cinematic-character-track cinematic-character-track--${intent.mode}`}
+            data-gameplay-track
+          >
             <img
               alt=""
-              className={`cinematic-curtain__icon cinematic-curtain__icon--${intent.mode}`}
-              data-cinematic-icon
+              className={`cinematic-character cinematic-character--${intent.mode}`}
+              data-gameplay-icon
               src={characterAssets[intent.mode]}
             />
           </div>
-        </>
-      )}
+        </div>
+
+        <div className="cinematic-curtain" data-cinematic-curtain>
+          <img
+            alt=""
+            className={`cinematic-curtain__icon cinematic-curtain__icon--${intent.mode}`}
+            data-cinematic-icon
+            src={characterAssets[intent.mode]}
+          />
+        </div>
+      </>
     </div>
   )
 })

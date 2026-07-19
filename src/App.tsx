@@ -20,6 +20,7 @@ import {
 } from './features/navigation/scene-navigator'
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
 import { useSceneNavigator } from './features/navigation/use-scene-navigator'
+import { ENABLE_CINEMATIC_TRANSITIONS } from './features/navigation/transition-config'
 import { useOpeningSequence } from './features/opening/use-opening-sequence'
 import { SceneBackdrop } from './features/scene/SceneBackdrop'
 import { SceneGround } from './features/scene/SceneGround'
@@ -33,7 +34,6 @@ function getInitialScene(): SceneId {
 }
 
 const OPENING_PLAYED_KEY = 'gd-portfolio-opening-played'
-const SKIP_TRANSITIONS_KEY = 'gd-portfolio-skip-transitions'
 
 function shouldPlayOpening(scene: SceneId): boolean {
   if (scene !== 'hero' || typeof window === 'undefined') {
@@ -47,25 +47,10 @@ function shouldPlayOpening(scene: SceneId): boolean {
   }
 }
 
-function getInitialSkipPreference(): boolean {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  try {
-    return window.localStorage.getItem(SKIP_TRANSITIONS_KEY) === 'true'
-  } catch {
-    return false
-  }
-}
-
 export default function App(): ReactElement {
   const initialScene = useRef<SceneId>(getInitialScene()).current
   const [openingEnabled] = useState(() => shouldPlayOpening(initialScene))
   const [displayScene, setDisplayScene] = useState<SceneId>(initialScene)
-  const [skipTransitions, setSkipTransitions] = useState(
-    getInitialSkipPreference,
-  )
   const [hasNavigated, setHasNavigated] = useState(false)
   const [cubeReaction, setCubeReaction] = useState<CubeReaction | null>(null)
   const reactionNonce = useRef(0)
@@ -80,7 +65,7 @@ export default function App(): ReactElement {
     recover,
     transitionTo,
     target,
-  } = useSceneNavigator(initialScene)
+  } = useSceneNavigator(initialScene, ENABLE_CINEMATIC_TRANSITIONS)
   const opening = useOpeningSequence(openingEnabled)
   const shouldPushHistory = useRef(false)
 
@@ -139,17 +124,6 @@ export default function App(): ReactElement {
       // Storage can be unavailable in privacy-restricted browsing contexts.
     }
   }, [opening.phase, openingEnabled])
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(
-        SKIP_TRANSITIONS_KEY,
-        skipTransitions ? 'true' : 'false',
-      )
-    } catch {
-      // The in-memory preference still works when storage is unavailable.
-    }
-  }, [skipTransitions])
 
   useEffect(() => {
     const html = document.documentElement
@@ -223,18 +197,17 @@ export default function App(): ReactElement {
 
   const showNavigationPrompt =
     current === 'hero' &&
-    displayScene === 'hero' &&
+    (isTransitioning ? displayScene : current) === 'hero' &&
     !hasNavigated &&
     !opening.isActive &&
     !isTransitioning
+  const sceneToRender = isTransitioning ? displayScene : current
 
   return (
     <div
       className="app-shell"
       data-cinematic-active={isTransitioning ? 'true' : 'false'}
-      data-cinematic-skip={
-        isTransitioning && skipTransitions ? 'true' : 'false'
-      }
+      data-transitions-enabled={ENABLE_CINEMATIC_TRANSITIONS ? 'true' : 'false'}
       data-opening={opening.isActive ? 'true' : 'false'}
       data-opening-phase={opening.phase}
       ref={opening.scope}
@@ -249,6 +222,7 @@ export default function App(): ReactElement {
       </div>
 
       <CheckpointProgress
+        animateTransitions={ENABLE_CINEMATIC_TRANSITIONS}
         aria-hidden={opening.isActive || undefined}
         data-opening-progress
         current={current}
@@ -261,7 +235,7 @@ export default function App(): ReactElement {
         aria-live="polite"
         className="route-stage"
       >
-        <RouteStage scene={displayScene} />
+        <RouteStage scene={sceneToRender} />
       </main>
 
       <div
@@ -279,18 +253,6 @@ export default function App(): ReactElement {
         aria-hidden={opening.isActive || isTransitioning || undefined}
         className="navigation-utilities"
       >
-        <label
-          className="skip-transitions-control"
-          data-scene-scroll-exempt="true"
-        >
-          <input
-            checked={skipTransitions}
-            onChange={(event) => setSkipTransitions(event.target.checked)}
-            type="checkbox"
-          />
-          <span>Skip transitions</span>
-        </label>
-
         {showNavigationPrompt && (
           <p className="navigation-prompt" data-navigation-prompt>
             <span className="navigation-prompt__desktop">Scroll or use arrow keys</span>
@@ -299,14 +261,13 @@ export default function App(): ReactElement {
         )}
       </div>
 
-      {activeTransition && (
+      {ENABLE_CINEMATIC_TRANSITIONS && activeTransition && (
         <CinematicTransition
           command={activeTransition}
           onComplete={completeTransition}
           onCovered={coverDestination}
           onRecover={recoverTransition}
           ref={cinematicRef}
-          skipTransition={skipTransitions}
         />
       )}
 
