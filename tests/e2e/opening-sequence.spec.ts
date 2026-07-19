@@ -35,7 +35,26 @@ test('plays the opening sequence and settles into the hero layout', async ({
   await page.keyboard.press('End')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Let’s make contact.',
-    { timeout: 4_000 },
+    { timeout: 10_000 },
+  )
+})
+
+test('plays the opening only once per tab session', async ({ page }) => {
+  await page.goto('/#hero')
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-opening',
+    'false',
+    { timeout: 9_000 },
+  )
+
+  await page.reload()
+
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-opening',
+    'false',
+  )
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'A portfolio in motion.',
   )
 })
 

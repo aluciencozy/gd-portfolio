@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { SceneId } from './scene-navigator'
 
 interface ControlledSceneInputOptions {
@@ -6,6 +6,7 @@ interface ControlledSceneInputOptions {
   onNext: () => void
   onPrevious: () => void
   onScene: (scene: SceneId) => void
+  onInterrupt?: () => void
 }
 
 const TOUCH_THRESHOLD = 16
@@ -30,7 +31,11 @@ export function useControlledSceneInput({
   onNext,
   onPrevious,
   onScene,
+  onInterrupt,
 }: ControlledSceneInputOptions): void {
+  const wheelReady = useRef(true)
+  const wheelResetTimeout = useRef<number | null>(null)
+
   useEffect(() => {
     let touchStartY: number | null = null
     let touchStartExempt = false
@@ -41,7 +46,20 @@ export function useControlledSceneInput({
       }
 
       event.preventDefault()
+      if (wheelResetTimeout.current !== null) {
+        window.clearTimeout(wheelResetTimeout.current)
+      }
+      wheelResetTimeout.current = window.setTimeout(() => {
+        wheelReady.current = true
+      }, 180)
+
+      if (!wheelReady.current) {
+        return
+      }
+
+      wheelReady.current = false
       if (isTransitioning) {
+        onInterrupt?.()
         return
       }
 
@@ -72,12 +90,12 @@ export function useControlledSceneInput({
 
       if (!touchStartExempt && isSwipe) {
         event.preventDefault()
-        if (!isTransitioning) {
-          if (deltaY < 0) {
-            onNext()
-          } else {
-            onPrevious()
-          }
+        if (isTransitioning) {
+          onInterrupt?.()
+        } else if (deltaY < 0) {
+          onNext()
+        } else {
+          onPrevious()
         }
       }
 
@@ -88,15 +106,26 @@ export function useControlledSceneInput({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
         event.defaultPrevented ||
+        event.repeat ||
         isSceneScrollExempt(event.target) ||
-        isEditableTarget(event.target) ||
-        isTransitioning
+        isEditableTarget(event.target)
       ) {
         return
       }
 
       const nextKeys = new Set(['ArrowDown', 'ArrowRight', 'PageDown', ' ', 'Spacebar'])
       const previousKeys = new Set(['ArrowUp', 'ArrowLeft', 'PageUp'])
+      const isNavigationKey =
+        nextKeys.has(event.key) ||
+        previousKeys.has(event.key) ||
+        event.key === 'Home' ||
+        event.key === 'End'
+
+      if (isTransitioning && isNavigationKey) {
+        event.preventDefault()
+        onInterrupt?.()
+        return
+      }
 
       if (nextKeys.has(event.key)) {
         event.preventDefault()
@@ -126,5 +155,5 @@ export function useControlledSceneInput({
       window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isTransitioning, onNext, onPrevious, onScene])
+  }, [isTransitioning, onInterrupt, onNext, onPrevious, onScene])
 }

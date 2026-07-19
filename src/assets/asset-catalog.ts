@@ -2,12 +2,21 @@ import backgroundAsset from '../../assets/background-png.png'
 import checkpointFilledAsset from './checkpoints/filled.svg'
 import checkpointUnfilledAsset from './checkpoints/unfilled.svg'
 import cubeAsset from './characters/cube.svg'
+import shipAsset from './characters/ship.svg'
+import waveAsset from './characters/wave.svg'
+import spikeAsset from './obstacles/spike.svg'
 import progressFillAsset from './ui/sliderBar-uhd.png'
 import progressGrooveAsset from './ui/slidergroove-uhd.png'
 import groundAsset from '../../assets/ground-square.png'
 
 export const characterAssets = {
   cube: cubeAsset,
+  ship: shipAsset,
+  wave: waveAsset,
+} as const
+
+export const obstacleAssets = {
+  spike: spikeAsset,
 } as const
 
 export const backgroundAssets = {
