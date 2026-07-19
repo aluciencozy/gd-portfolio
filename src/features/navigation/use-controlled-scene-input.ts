@@ -2,11 +2,10 @@ import { useEffect, useRef } from 'react'
 import type { SceneId } from './scene-navigator'
 
 interface ControlledSceneInputOptions {
-  isTransitioning: boolean
+  isLocked: boolean
   onNext: () => void
   onPrevious: () => void
   onScene: (scene: SceneId) => void
-  onKeyboardSkip?: () => void
 }
 
 const TOUCH_THRESHOLD = 16
@@ -27,11 +26,10 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 export function useControlledSceneInput({
-  isTransitioning,
+  isLocked,
   onNext,
   onPrevious,
   onScene,
-  onKeyboardSkip,
 }: ControlledSceneInputOptions): void {
   const wheelReady = useRef(true)
   const wheelResetTimeout = useRef<number | null>(null)
@@ -58,7 +56,7 @@ export function useControlledSceneInput({
       }
 
       wheelReady.current = false
-      if (isTransitioning) {
+      if (isLocked) {
         return
       }
 
@@ -89,9 +87,9 @@ export function useControlledSceneInput({
 
       if (!touchStartExempt && isSwipe) {
         event.preventDefault()
-        if (!isTransitioning && deltaY < 0) {
+        if (!isLocked && deltaY < 0) {
           onNext()
-        } else if (!isTransitioning) {
+        } else if (!isLocked) {
           onPrevious()
         }
       }
@@ -118,9 +116,8 @@ export function useControlledSceneInput({
         event.key === 'Home' ||
         event.key === 'End'
 
-      if (isTransitioning && isNavigationKey) {
+      if (isLocked && isNavigationKey) {
         event.preventDefault()
-        onKeyboardSkip?.()
         return
       }
 
@@ -152,5 +149,5 @@ export function useControlledSceneInput({
       window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isTransitioning, onKeyboardSkip, onNext, onPrevious, onScene])
+  }, [isLocked, onNext, onPrevious, onScene])
 }

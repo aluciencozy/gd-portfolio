@@ -3,61 +3,36 @@ export const SCENE_IDS = ['hero', 'about', 'projects', 'contact'] as const
 export type SceneId = (typeof SCENE_IDS)[number]
 export type NavigationDirection = 'forward' | 'backward'
 
-export interface TransitionCommand {
-  from: SceneId
-  to: SceneId
-}
-
 export interface SceneNavigatorSnapshot {
   current: SceneId
-  target: SceneId | null
-  isTransitioning: boolean
 }
 
 export interface SceneNavigator {
   getSnapshot(): SceneNavigatorSnapshot
   subscribe(listener: () => void): () => void
-  transitionTo(scene: SceneId): TransitionCommand | null
-  next(): TransitionCommand | null
-  previous(): TransitionCommand | null
-  complete(): void
-  recover(): void
+  navigateTo(scene: SceneId): boolean
+  next(): boolean
+  previous(): boolean
 }
 
 export function createSceneNavigator(initialScene: SceneId = 'hero'): SceneNavigator {
   const listeners = new Set<() => void>()
   let snapshot: SceneNavigatorSnapshot = {
     current: initialScene,
-    target: null,
-    isTransitioning: false,
   }
 
   const notify = () => {
     listeners.forEach((listener) => listener())
   }
 
-  const setSnapshot = (nextSnapshot: SceneNavigatorSnapshot) => {
-    snapshot = nextSnapshot
+  const navigateTo = (destination: SceneId): boolean => {
+    if (destination === snapshot.current) {
+      return false
+    }
+
+    snapshot = { current: destination }
     notify()
-  }
-
-  const request = (destination: SceneId): TransitionCommand | null => {
-    if (snapshot.isTransitioning || destination === snapshot.current) {
-      return null
-    }
-
-    const command: TransitionCommand = {
-      from: snapshot.current,
-      to: destination,
-    }
-
-    setSnapshot({
-      current: snapshot.current,
-      target: destination,
-      isTransitioning: true,
-    })
-
-    return command
+    return true
   }
 
   return {
@@ -66,38 +41,16 @@ export function createSceneNavigator(initialScene: SceneId = 'hero'): SceneNavig
       listeners.add(listener)
       return () => listeners.delete(listener)
     },
-    transitionTo: request,
+    navigateTo,
     next: () => {
       const currentIndex = SCENE_IDS.indexOf(snapshot.current)
       const nextScene = SCENE_IDS[currentIndex + 1]
-      return nextScene ? request(nextScene) : null
+      return nextScene ? navigateTo(nextScene) : false
     },
     previous: () => {
       const currentIndex = SCENE_IDS.indexOf(snapshot.current)
       const previousScene = SCENE_IDS[currentIndex - 1]
-      return previousScene ? request(previousScene) : null
-    },
-    complete: () => {
-      if (!snapshot.isTransitioning || !snapshot.target) {
-        return
-      }
-
-      setSnapshot({
-        current: snapshot.target,
-        target: null,
-        isTransitioning: false,
-      })
-    },
-    recover: () => {
-      if (!snapshot.isTransitioning || !snapshot.target) {
-        return
-      }
-
-      setSnapshot({
-        current: snapshot.target,
-        target: null,
-        isTransitioning: false,
-      })
+      return previousScene ? navigateTo(previousScene) : false
     },
   }
 }

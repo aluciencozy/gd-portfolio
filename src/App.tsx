@@ -6,10 +6,6 @@ import {
   type ReactElement,
 } from 'react'
 import { CheckpointProgress } from './components/CheckpointProgress'
-import {
-  CinematicTransition,
-  type CinematicTransitionHandle,
-} from './components/CinematicTransition'
 import { RestingCube, type CubeReaction } from './components/RestingCube'
 import { RouteStage } from './components/RouteStage'
 import {
@@ -20,7 +16,6 @@ import {
 } from './features/navigation/scene-navigator'
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
 import { useSceneNavigator } from './features/navigation/use-scene-navigator'
-import { ENABLE_CINEMATIC_TRANSITIONS } from './features/navigation/transition-config'
 import { useOpeningSequence } from './features/opening/use-opening-sequence'
 import { SceneBackdrop } from './features/scene/SceneBackdrop'
 import { SceneGround } from './features/scene/SceneGround'
@@ -50,22 +45,15 @@ function shouldPlayOpening(scene: SceneId): boolean {
 export default function App(): ReactElement {
   const initialScene = useRef<SceneId>(getInitialScene()).current
   const [openingEnabled] = useState(() => shouldPlayOpening(initialScene))
-  const [displayScene, setDisplayScene] = useState<SceneId>(initialScene)
   const [hasNavigated, setHasNavigated] = useState(false)
   const [cubeReaction, setCubeReaction] = useState<CubeReaction | null>(null)
   const reactionNonce = useRef(0)
-  const cinematicRef = useRef<CinematicTransitionHandle>(null)
   const {
-    activeTransition,
-    complete,
     current,
-    isTransitioning,
+    navigateTo: navigateScene,
     next,
     previous,
-    recover,
-    transitionTo,
-    target,
-  } = useSceneNavigator(initialScene, ENABLE_CINEMATIC_TRANSITIONS)
+  } = useSceneNavigator(initialScene)
   const opening = useOpeningSequence(openingEnabled)
   const shouldPushHistory = useRef(false)
 
@@ -80,8 +68,8 @@ export default function App(): ReactElement {
   }, [])
 
   const navigateTo = useCallback(
-    (scene: SceneId) => startRequest(() => transitionTo(scene)),
-    [startRequest, transitionTo],
+    (scene: SceneId) => startRequest(() => navigateScene(scene)),
+    [navigateScene, startRequest],
   )
   const reactAtBoundary = useCallback(
     (direction: CubeReaction['direction']): void => {
@@ -101,13 +89,8 @@ export default function App(): ReactElement {
     }
   }, [previous, reactAtBoundary, startRequest])
 
-  const finishCurrentTransition = useCallback(() => {
-    cinematicRef.current?.finishCurrent()
-  }, [])
-
   useControlledSceneInput({
-    isTransitioning: isTransitioning || opening.isActive,
-    onKeyboardSkip: isTransitioning ? finishCurrentTransition : undefined,
+    isLocked: opening.isActive,
     onNext: navigateNext,
     onPrevious: navigatePrevious,
     onScene: navigateTo,
@@ -141,17 +124,13 @@ export default function App(): ReactElement {
   }, [])
 
   useEffect(() => {
-    if (isTransitioning) {
-      return
-    }
-
     if (shouldPushHistory.current) {
       window.history.pushState(null, '', sceneHash(current))
       shouldPushHistory.current = false
     } else if (window.location.hash !== sceneHash(current)) {
       window.history.replaceState(null, '', sceneHash(current))
     }
-  }, [current, isTransitioning])
+  }, [current])
 
   useEffect(() => {
     const handlePopState = () => {
@@ -160,7 +139,6 @@ export default function App(): ReactElement {
       if (
         !requestedScene ||
         requestedScene === current ||
-        isTransitioning ||
         opening.isActive
       ) {
         window.history.replaceState(null, '', sceneHash(current))
@@ -168,46 +146,21 @@ export default function App(): ReactElement {
       }
 
       shouldPushHistory.current = false
-      transitionTo(requestedScene)
+      navigateScene(requestedScene)
     }
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [current, isTransitioning, opening.isActive, transitionTo])
-
-  const coverDestination = useCallback(() => {
-    if (activeTransition) {
-      setDisplayScene(activeTransition.to)
-    }
-  }, [activeTransition])
-
-  const completeTransition = useCallback(() => {
-    if (activeTransition) {
-      setDisplayScene(activeTransition.to)
-    }
-    complete()
-  }, [activeTransition, complete])
-
-  const recoverTransition = useCallback(() => {
-    if (activeTransition) {
-      setDisplayScene(activeTransition.to)
-    }
-    recover()
-  }, [activeTransition, recover])
+  }, [current, navigateScene, opening.isActive])
 
   const showNavigationPrompt =
     current === 'hero' &&
-    (isTransitioning ? displayScene : current) === 'hero' &&
     !hasNavigated &&
-    !opening.isActive &&
-    !isTransitioning
-  const sceneToRender = isTransitioning ? displayScene : current
+    !opening.isActive
 
   return (
     <div
       className="app-shell"
-      data-cinematic-active={isTransitioning ? 'true' : 'false'}
-      data-transitions-enabled={ENABLE_CINEMATIC_TRANSITIONS ? 'true' : 'false'}
       data-opening={opening.isActive ? 'true' : 'false'}
       data-opening-phase={opening.phase}
       ref={opening.scope}
@@ -222,20 +175,18 @@ export default function App(): ReactElement {
       </div>
 
       <CheckpointProgress
-        animateTransitions={ENABLE_CINEMATIC_TRANSITIONS}
         aria-hidden={opening.isActive || undefined}
         data-opening-progress
         current={current}
-        target={target}
         onNavigate={navigateTo}
       />
 
       <main
-        aria-hidden={opening.isActive || isTransitioning || undefined}
+        aria-hidden={opening.isActive || undefined}
         aria-live="polite"
         className="route-stage"
       >
-        <RouteStage scene={sceneToRender} />
+        <RouteStage scene={current} />
       </main>
 
       <div
@@ -244,13 +195,13 @@ export default function App(): ReactElement {
         data-scene-camera
       >
         <RestingCube
-          paused={opening.isActive || isTransitioning}
+          paused={opening.isActive}
           reaction={cubeReaction}
         />
       </div>
 
       <div
-        aria-hidden={opening.isActive || isTransitioning || undefined}
+        aria-hidden={opening.isActive || undefined}
         className="navigation-utilities"
       >
         {showNavigationPrompt && (
@@ -260,16 +211,6 @@ export default function App(): ReactElement {
           </p>
         )}
       </div>
-
-      {ENABLE_CINEMATIC_TRANSITIONS && activeTransition && (
-        <CinematicTransition
-          command={activeTransition}
-          onComplete={completeTransition}
-          onCovered={coverDestination}
-          onRecover={recoverTransition}
-          ref={cinematicRef}
-        />
-      )}
 
       <span className="sr-only">Current section: {SCENE_IDS.indexOf(current) + 1} of {SCENE_IDS.length}</span>
     </div>
