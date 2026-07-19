@@ -52,19 +52,38 @@ interface GameplaySample {
   centerX: number
   centerY: number
   angle: number
+  trackLeft: number
+  trackVisibility: string
 }
 
-async function collectGameplay(icon: Locator): Promise<GameplaySample[]> {
-  return icon.evaluate(
-    (element) =>
+async function collectGameplayFromActivation(
+  page: Page,
+): Promise<GameplaySample[]> {
+  return page.evaluate(
+    () =>
       new Promise<GameplaySample[]>((resolve) => {
-        const startedAt = performance.now()
+        const selector = '[data-gameplay-track][data-gameplay-active="true"]'
+        let startedAt: number | null = null
         const samples: GameplaySample[] = []
 
         const sample = (timestamp: number): void => {
-          const rect = element.getBoundingClientRect()
-          const trackRect = element.parentElement?.getBoundingClientRect() ?? rect
-          const transform = getComputedStyle(element).transform
+          const transition = document.querySelector<HTMLElement>(
+            '.cinematic-transition',
+          )
+          const track = transition?.querySelector<HTMLElement>(
+            '[data-gameplay-track]',
+          )
+          const icon = transition?.querySelector<HTMLElement>(
+            '[data-gameplay-icon]',
+          )
+          if (!track || !icon || startedAt === null) {
+            requestAnimationFrame(sample)
+            return
+          }
+
+          const rect = icon.getBoundingClientRect()
+          const trackRect = track.getBoundingClientRect()
+          const transform = getComputedStyle(icon).transform
           const values = transform
             .match(/matrix(?:3d)?\(([^)]+)\)/)?.[1]
             ?.split(',')
@@ -78,6 +97,8 @@ async function collectGameplay(icon: Locator): Promise<GameplaySample[]> {
             centerX: trackRect.left + trackRect.width / 2,
             centerY: rect.top + rect.height / 2,
             angle,
+            trackLeft: trackRect.left,
+            trackVisibility: getComputedStyle(track).visibility,
           })
 
           if (timestamp - startedAt >= 1_800) {
@@ -88,7 +109,23 @@ async function collectGameplay(icon: Locator): Promise<GameplaySample[]> {
           requestAnimationFrame(sample)
         }
 
-        requestAnimationFrame(sample)
+        const start = (): void => {
+          if (startedAt !== null || !document.querySelector(selector)) {
+            return
+          }
+
+          startedAt = performance.now()
+          observer.disconnect()
+          sample(startedAt)
+        }
+
+        const observer = new MutationObserver(start)
+        observer.observe(document.body, {
+          attributes: true,
+          childList: true,
+          subtree: true,
+        })
+        start()
       }),
   )
 }
@@ -135,28 +172,44 @@ function expectConstantSpeed(samples: GameplaySample[], viewportWidth: number): 
   }
 }
 
-function waitForGameplayStart(page: Page): Promise<void> {
-  return page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        const selector = '[data-gameplay-track][data-gameplay-active="true"]'
-        if (document.querySelector(selector)) {
-          resolve()
-          return
-        }
+function expectSmoothCubeArc(samples: GameplaySample[]): void {
+  const visibleSamples = samples.filter(
+    (sample) => sample.trackVisibility === 'visible',
+  )
+  const centerYs = visibleSamples.map((sample) => sample.centerY)
+  const apexIndex = centerYs.indexOf(Math.min(...centerYs))
+  const ascentSpeeds: number[] = []
+  const descentSpeeds: number[] = []
 
-        const observer = new MutationObserver(() => {
-          if (document.querySelector(selector)) {
-            observer.disconnect()
-            resolve()
-          }
-        })
-        observer.observe(document.body, {
-          attributes: true,
-          childList: true,
-          subtree: true,
-        })
-      }),
+  for (let index = 1; index <= apexIndex; index += 1) {
+    const previous = visibleSamples[index - 1]
+    const current = visibleSamples[index]
+    const delta = previous.centerY - current.centerY
+    const elapsed = current.elapsed - previous.elapsed
+    if (delta > 0.5 && elapsed > 0) {
+      ascentSpeeds.push(delta / elapsed)
+    }
+  }
+
+  for (let index = apexIndex + 1; index < centerYs.length; index += 1) {
+    const previous = visibleSamples[index - 1]
+    const current = visibleSamples[index]
+    const delta = current.centerY - previous.centerY
+    const elapsed = current.elapsed - previous.elapsed
+    if (delta > 0.5 && elapsed > 0) {
+      descentSpeeds.push(delta / elapsed)
+    }
+  }
+
+  expect(apexIndex).toBeGreaterThan(3)
+  expect(apexIndex).toBeLessThan(centerYs.length - 4)
+  expect(ascentSpeeds.length).toBeGreaterThan(5)
+  expect(descentSpeeds.length).toBeGreaterThan(5)
+  expect(Math.max(...ascentSpeeds.slice(-2))).toBeLessThan(
+    Math.max(...ascentSpeeds) * 0.8,
+  )
+  expect(Math.max(...descentSpeeds.slice(0, 2))).toBeLessThan(
+    Math.max(...descentSpeeds) * 0.8,
   )
 }
 
@@ -182,6 +235,20 @@ test('covers the old route before swapping to the destination', async ({
   })
   await expect(page.locator('[data-scene="contact"]')).toBeAttached()
   await expect(cubeTransition.locator('[data-cinematic-icon]')).toBeVisible()
+  const spikes = cubeTransition.locator('.cinematic-cube-spike')
+  await expect(spikes).toHaveCount(2)
+  await expect(spikes.nth(0)).toBeVisible()
+  await expect(spikes.nth(1)).toBeVisible()
+  const spikeBoxes = await spikes.evaluateAll((elements) =>
+    elements.map((element) => {
+      const { x, y, width, height } = element.getBoundingClientRect()
+      return { x, y, width, height }
+    }),
+  )
+  expect(spikeBoxes[1].x).toBeGreaterThan(
+    spikeBoxes[0].x + spikeBoxes[0].width - 1,
+  )
+  expect(Math.abs(spikeBoxes[1].y - spikeBoxes[0].y)).toBeLessThan(1)
   await expect(cubeTransition).toHaveAttribute(
     'data-cinematic-phase',
     'gameplay',
@@ -375,13 +442,18 @@ test('keeps each gameplay icon moving at constant horizontal speed', async ({
 }) => {
   await openSettled(page, 'hero')
 
-  const cubeGameplayStarted = waitForGameplayStart(page)
+  const cubeGameplay = collectGameplayFromActivation(page)
   await page.keyboard.press('ArrowRight')
   let transition = page.locator('.cinematic-transition')
   await expect(transition).toHaveAttribute('data-cinematic-mode', 'cube')
-  await cubeGameplayStarted
-  let icon = transition.locator('[data-gameplay-icon]')
-  const cubeSamples = await collectGameplay(icon)
+  const cubeSamples = await cubeGameplay
+  const firstVisibleCubeSample = cubeSamples.find(
+    (sample) => sample.trackVisibility === 'visible',
+  )
+  expect(firstVisibleCubeSample).toBeDefined()
+  expect(firstVisibleCubeSample!.trackLeft).toBeLessThan(
+    -(page.viewportSize()?.width ?? 1280) * 0.15,
+  )
   expectConstantSpeed(cubeSamples, page.viewportSize()?.width ?? 1280)
   const cubeVerticalRange =
     Math.max(...cubeSamples.map((sample) => sample.centerY)) -
@@ -389,19 +461,18 @@ test('keeps each gameplay icon moving at constant horizontal speed', async ({
   expect(cubeVerticalRange).toBeGreaterThan(
     (page.viewportSize()?.height ?? 720) * 0.2,
   )
+  expectSmoothCubeArc(cubeSamples)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'A little more about the maker.',
     { timeout: 10_000 },
   )
 
-  const shipGameplayStarted = waitForGameplayStart(page)
+  const shipGameplay = collectGameplayFromActivation(page)
   await page.keyboard.press('ArrowRight')
   transition = page.locator('.cinematic-transition')
   await expect(transition).toHaveAttribute('data-cinematic-mode', 'ship')
-  await shipGameplayStarted
-  icon = transition.locator('[data-gameplay-icon]')
   expectConstantSpeed(
-    await collectGameplay(icon),
+    await shipGameplay,
     page.viewportSize()?.width ?? 1280,
   )
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -409,13 +480,11 @@ test('keeps each gameplay icon moving at constant horizontal speed', async ({
     { timeout: 10_000 },
   )
 
-  const waveGameplayStarted = waitForGameplayStart(page)
+  const waveGameplay = collectGameplayFromActivation(page)
   await page.keyboard.press('ArrowRight')
   transition = page.locator('.cinematic-transition')
   await expect(transition).toHaveAttribute('data-cinematic-mode', 'wave')
-  await waveGameplayStarted
-  icon = transition.locator('[data-gameplay-icon]')
-  const waveSamples = await collectGameplay(icon)
+  const waveSamples = await waveGameplay
   expectConstantSpeed(waveSamples, page.viewportSize()?.width ?? 1280)
   const waveAngleDelta = waveSamples.reduce((largestDelta, sample, index) => {
     const previous = waveSamples[index - 1]

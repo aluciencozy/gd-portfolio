@@ -80,12 +80,20 @@ function ModeObstacles({ mode }: { mode: CinematicMode }): ReactElement | null {
     return (
       <>
         <div className="cinematic-cube-ground" />
-        <img
-          alt=""
-          aria-hidden="true"
-          className="cinematic-cube-spike"
-          src={obstacleAssets.spike}
-        />
+        <div className="cinematic-cube-spikes">
+          <img
+            alt=""
+            aria-hidden="true"
+            className="cinematic-cube-spike"
+            src={obstacleAssets.spike}
+          />
+          <img
+            alt=""
+            aria-hidden="true"
+            className="cinematic-cube-spike"
+            src={obstacleAssets.spike}
+          />
+        </div>
       </>
     )
   }
@@ -415,6 +423,7 @@ export const CinematicTransition = forwardRef<
         duration: GAMEPLAY_DURATION,
         ease: 'linear' as const,
       }
+      track.style.transform = `translate3d(${startX}px, 0px, 0px)`
       track.dataset.gameplayActive = 'true'
       track.style.visibility = 'visible'
       icon.style.visibility = 'visible'
@@ -437,6 +446,17 @@ export const CinematicTransition = forwardRef<
             icon,
             {
               y: [0, 0, -Math.min(height * 0.36, 320), 0, 0],
+            },
+            {
+              duration: GAMEPLAY_DURATION,
+              ease: ['linear', 'easeInOut', 'easeInOut', 'linear'],
+              times: [0, 0.28, 0.5, 0.72, 1],
+              at: 0,
+            },
+          ],
+          [
+            icon,
+            {
               rotate: [0, 0, 180, 360, 360],
               scaleX: [1, 0.92, 1, 1.08, 1],
               scaleY: [1, 1.08, 1, 0.92, 1],

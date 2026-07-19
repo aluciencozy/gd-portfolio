@@ -502,16 +502,23 @@ a {
   box-shadow: 0 0 0.85rem rgb(162 177 255 / 88%);
 }
 
-.cinematic-cube-spike {
+.cinematic-cube-spikes {
   position: absolute;
   z-index: 5;
   bottom: var(--scene-ground-height);
   left: 52%;
-  width: clamp(6rem, 15svh, 10.5rem);
-  height: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(0.25rem, 0.6vw, 0.5rem);
   transform: translateX(-50%);
   filter: brightness(0) drop-shadow(0 0 2px white)
     drop-shadow(0 0 0.7rem white);
+}
+
+.cinematic-cube-spike {
+  display: block;
+  width: clamp(6rem, 15svh, 10.5rem);
+  height: auto;
 }
 
 .cinematic-hazards {
@@ -629,7 +636,7 @@ a {
   }
 
   .cinematic-hazards,
-  .cinematic-cube-spike,
+  .cinematic-cube-spikes,
   .cinematic-cube-ground {
     display: none;
   }
