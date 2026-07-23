@@ -1,10 +1,19 @@
 # Portfolio in Motion
 
-A Vite + React + TypeScript portfolio prototype built around four controlled checkpoints: Hero, About, Projects, and Contact.
+A Vite, React, and TypeScript portfolio inspired by Geometry Dash. The site is
+organized as five full-screen checkpoints: Hero, About, Experience, Projects,
+and Contact.
 
-The current experience uses a full-viewport repeating PNG backdrop, a persistent animated cube, and a top progress bar. Route transitions are intentionally immediate while the portfolio content is being built. The opening animation remains enabled.
+Wheel input, touch swipes, keyboard commands, checkpoint buttons, browser
+history, and direct hash links all use the same bounded scene navigator. Motion
+handles the edge-aware content choreography, checkpoint progress, scene color
+crossfades, opening sequence, cube reactions, and continuous cube idle motion.
 
-Wheel input, touch swipes, keyboard commands, checkpoint buttons, and browser hash navigation use the same bounded scene navigator. The document itself does not become a scroll surface. Direct links remain immediate and the opening plays once per tab session.
+The project data is centralized in
+`src/components/portfolio-data.ts`, including the skills and project arrays.
+Adding another project only requires another object in that collection. The
+current resume is bundled as a downloadable PDF from the Hero and Contact
+screens.
 
 ## Commands
 
@@ -16,14 +25,16 @@ npm run test:e2e
 npm run preview
 ```
 
+## Inputs
+
+- Wheel or trackpad: previous and next checkpoint
+- Arrow keys, Page Up, Page Down, and Space: previous and next checkpoint
+- Home and End: first and last checkpoint
+- Touch swipe: previous and next checkpoint
+- Checkpoint markers: direct navigation
+
 ## Assets
 
-- Original supplied assets: `assets/`
-- Optimized and imported assets: `src/assets/`
+- Original supplied assets and resume: `assets/`
+- Optimized and imported visual assets: `src/assets/`
 - SVG optimizer configuration: `svgo.config.mjs`
-
-The supplied source assets are retained for future visual passes. The active prototype imports the background, ground, cube, ship, wave, checkpoint, and progress-bar assets.
-
-## Project plan
-
-The active implementation roadmap is in [`PLAN.md`](PLAN.md).

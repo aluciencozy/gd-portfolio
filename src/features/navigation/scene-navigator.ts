@@ -1,4 +1,10 @@
-export const SCENE_IDS = ['hero', 'about', 'projects', 'contact'] as const
+export const SCENE_IDS = [
+  'hero',
+  'about',
+  'experience',
+  'projects',
+  'contact',
+] as const
 
 export type SceneId = (typeof SCENE_IDS)[number]
 export type NavigationDirection = 'forward' | 'backward'

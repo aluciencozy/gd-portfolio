@@ -36,17 +36,15 @@ export function useOpeningSequence(enabled: boolean): OpeningSequence {
     )
     const cube = root.querySelector<HTMLElement>('[data-opening-cube]')
     const progress = root.querySelector<HTMLElement>('[data-opening-progress]')
-    const eyebrow = root.querySelector<HTMLElement>('[data-opening-eyebrow]')
-    const heading = root.querySelector<HTMLElement>('[data-opening-heading]')
-    const body = root.querySelector<HTMLElement>('[data-opening-body]')
+    const content = Array.from(
+      root.querySelectorAll<HTMLElement>('[data-opening-content]'),
+    )
 
     if (
       cameras.length === 0 ||
       !cube ||
       !progress ||
-      !eyebrow ||
-      !heading ||
-      !body
+      content.length === 0
     ) {
       setPhase('complete')
       return
@@ -161,32 +159,43 @@ export function useOpeningSequence(enabled: boolean): OpeningSequence {
         }
 
         setPhase('revealing')
-        ;[progress, eyebrow, heading, body].forEach((element) => {
+        ;[progress, ...content].forEach((element) => {
           element.style.visibility = 'visible'
           element.style.willChange = 'transform, opacity, filter'
         })
 
-        await animate([
-          [
+        await Promise.all([
+          animate(
             progress,
-            { opacity: [0, 1], y: [-18, 0], filter: ['blur(10px)', 'blur(0px)'] },
-            { at: 0, duration: 0.7, ease: EASE_OUT },
-          ],
-          [
-            eyebrow,
-            { opacity: [0, 1], y: [24, 0], filter: ['blur(10px)', 'blur(0px)'] },
-            { at: 0.12, duration: 0.78, ease: EASE_OUT },
-          ],
-          [
-            heading,
-            { opacity: [0, 1], y: [24, 0], filter: ['blur(10px)', 'blur(0px)'] },
-            { at: 0.2, duration: 0.78, ease: EASE_OUT },
-          ],
-          [
-            body,
-            { opacity: [0, 1], y: [24, 0], filter: ['blur(10px)', 'blur(0px)'] },
-            { at: 0.28, duration: 0.78, ease: EASE_OUT },
-          ],
+            {
+              opacity: [0, 1],
+              y: [-18, 0],
+              filter: ['blur(10px)', 'blur(0px)'],
+            },
+            { duration: 0.7, ease: EASE_OUT },
+          ),
+          ...content.map((element, index) => {
+            const edge = element.dataset.edge
+            const horizontalOffset =
+              edge === 'left' ? -56 : edge === 'right' ? 56 : 0
+            const verticalOffset =
+              edge === 'top' ? -36 : edge === 'bottom' ? 36 : 0
+
+            return animate(
+              element,
+              {
+                opacity: [0, 1],
+                x: [horizontalOffset, 0],
+                y: [verticalOffset, 0],
+                filter: ['blur(10px)', 'blur(0px)'],
+              },
+              {
+                delay: 0.12 + index * 0.08,
+                duration: 0.78,
+                ease: EASE_OUT,
+              },
+            )
+          }),
         ])
 
         if (cancelled) {
@@ -197,7 +206,7 @@ export function useOpeningSequence(enabled: boolean): OpeningSequence {
           camera.style.willChange = 'auto'
         })
         cube.style.willChange = 'auto'
-        ;[progress, eyebrow, heading, body].forEach((element) => {
+        ;[progress, ...content].forEach((element) => {
           element.style.willChange = 'auto'
         })
         setPhase('complete')

@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import {
   useCallback,
   useEffect,
@@ -12,6 +13,7 @@ import {
   sceneHash,
   sceneIdFromHash,
   SCENE_IDS,
+  type NavigationDirection,
   type SceneId,
 } from './features/navigation/scene-navigator'
 import { useControlledSceneInput } from './features/navigation/use-controlled-scene-input'
@@ -46,31 +48,17 @@ export default function App(): ReactElement {
   const initialScene = useRef<SceneId>(getInitialScene()).current
   const [openingEnabled] = useState(() => shouldPlayOpening(initialScene))
   const [hasNavigated, setHasNavigated] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(!openingEnabled)
+  const [transitionDirection, setTransitionDirection] =
+    useState<NavigationDirection>('forward')
   const [cubeReaction, setCubeReaction] = useState<CubeReaction | null>(null)
+  const [cubeComment, setCubeComment] = useState<string | null>(null)
   const reactionNonce = useRef(0)
-  const {
-    current,
-    navigateTo: navigateScene,
-    next,
-    previous,
-  } = useSceneNavigator(initialScene)
+  const { current, navigateTo: navigateScene } =
+    useSceneNavigator(initialScene)
   const opening = useOpeningSequence(openingEnabled)
   const shouldPushHistory = useRef(false)
 
-  const startRequest = useCallback((request: () => boolean): boolean => {
-    if (request()) {
-      shouldPushHistory.current = true
-      setHasNavigated(true)
-      return true
-    }
-
-    return false
-  }, [])
-
-  const navigateTo = useCallback(
-    (scene: SceneId) => startRequest(() => navigateScene(scene)),
-    [navigateScene, startRequest],
-  )
   const reactAtBoundary = useCallback(
     (direction: CubeReaction['direction']): void => {
       reactionNonce.current += 1
@@ -78,19 +66,55 @@ export default function App(): ReactElement {
     },
     [],
   )
+
+  const requestScene = useCallback(
+    (scene: SceneId, pushHistory = true): boolean => {
+      if (opening.isActive || isTransitioning || scene === current) {
+        return false
+      }
+
+      const direction =
+        SCENE_IDS.indexOf(scene) > SCENE_IDS.indexOf(current)
+          ? 'forward'
+          : 'backward'
+
+      shouldPushHistory.current = pushHistory
+      setHasNavigated(true)
+      setIsTransitioning(true)
+      setTransitionDirection(direction)
+      setCubeComment(null)
+      reactionNonce.current += 1
+      setCubeReaction({ direction, nonce: reactionNonce.current })
+      return navigateScene(scene)
+    },
+    [current, isTransitioning, navigateScene, opening.isActive],
+  )
+
+  const navigateTo = useCallback(
+    (scene: SceneId) => {
+      requestScene(scene)
+    },
+    [requestScene],
+  )
   const navigateNext = useCallback(() => {
-    if (!startRequest(next)) {
+    const destination = SCENE_IDS[SCENE_IDS.indexOf(current) + 1]
+    if (destination) {
+      requestScene(destination)
+    } else {
       reactAtBoundary('forward')
     }
-  }, [next, reactAtBoundary, startRequest])
+  }, [current, reactAtBoundary, requestScene])
   const navigatePrevious = useCallback(() => {
-    if (!startRequest(previous)) {
+    const destination = SCENE_IDS[SCENE_IDS.indexOf(current) - 1]
+    if (destination) {
+      requestScene(destination)
+    } else {
       reactAtBoundary('backward')
     }
-  }, [previous, reactAtBoundary, startRequest])
+  }, [current, reactAtBoundary, requestScene])
 
   useControlledSceneInput({
-    isLocked: opening.isActive,
+    isLocked: opening.isActive || isTransitioning,
     onNext: navigateNext,
     onPrevious: navigatePrevious,
     onScene: navigateTo,
@@ -139,19 +163,19 @@ export default function App(): ReactElement {
       if (
         !requestedScene ||
         requestedScene === current ||
-        opening.isActive
+        opening.isActive ||
+        isTransitioning
       ) {
         window.history.replaceState(null, '', sceneHash(current))
         return
       }
 
-      shouldPushHistory.current = false
-      navigateScene(requestedScene)
+      requestScene(requestedScene, false)
     }
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [current, navigateScene, opening.isActive])
+  }, [current, isTransitioning, opening.isActive, requestScene])
 
   const showNavigationPrompt =
     current === 'hero' &&
@@ -163,6 +187,7 @@ export default function App(): ReactElement {
       className="app-shell"
       data-opening={opening.isActive ? 'true' : 'false'}
       data-opening-phase={opening.phase}
+      data-transitioning={isTransitioning ? 'true' : 'false'}
       ref={opening.scope}
     >
       <div
@@ -170,14 +195,15 @@ export default function App(): ReactElement {
         data-opening-camera
         data-scene-camera
       >
-        <SceneBackdrop />
-        <SceneGround />
+        <SceneBackdrop scene={current} />
+        <SceneGround scene={current} />
       </div>
 
       <CheckpointProgress
         aria-hidden={opening.isActive || undefined}
         data-opening-progress
         current={current}
+        isTransitioning={isTransitioning}
         onNavigate={navigateTo}
       />
 
@@ -186,7 +212,13 @@ export default function App(): ReactElement {
         aria-live="polite"
         className="route-stage"
       >
-        <RouteStage scene={current} />
+        <RouteStage
+          direction={transitionDirection}
+          onCubeComment={setCubeComment}
+          onNavigate={navigateTo}
+          onTransitionComplete={() => setIsTransitioning(false)}
+          scene={current}
+        />
       </main>
 
       <div
@@ -195,6 +227,7 @@ export default function App(): ReactElement {
         data-scene-camera
       >
         <RestingCube
+          comment={cubeComment}
           paused={opening.isActive}
           reaction={cubeReaction}
         />
@@ -205,10 +238,19 @@ export default function App(): ReactElement {
         className="navigation-utilities"
       >
         {showNavigationPrompt && (
-          <p className="navigation-prompt" data-navigation-prompt>
+          <motion.p
+            animate={{ opacity: [0.48, 0.94, 0.48], y: [0, -4, 0] }}
+            className="navigation-prompt"
+            data-navigation-prompt
+            transition={{
+              duration: 1.8,
+              ease: 'easeInOut',
+              repeat: Infinity,
+            }}
+          >
             <span className="navigation-prompt__desktop">Scroll or use arrow keys</span>
             <span className="navigation-prompt__mobile">Swipe to explore</span>
-          </p>
+          </motion.p>
         )}
       </div>
 

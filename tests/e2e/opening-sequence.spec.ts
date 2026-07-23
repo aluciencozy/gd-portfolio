@@ -24,7 +24,7 @@ test('plays the opening sequence and settles into the hero layout', async ({
   })
   await expect(progress).toBeVisible()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'A portfolio in motion.',
+    'Alex Cosentino',
   )
 
   const settledCube = await cube.boundingBox()
@@ -34,7 +34,7 @@ test('plays the opening sequence and settles into the hero layout', async ({
 
   await page.keyboard.press('End')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Let’s make contact.',
+    'Let’s build something good.',
     { timeout: 10_000 },
   )
 })
@@ -54,7 +54,7 @@ test('plays the opening only once per tab session', async ({ page }) => {
     'false',
   )
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'A portfolio in motion.',
+    'Alex Cosentino',
   )
 })
 
@@ -67,6 +67,6 @@ test('skips the opening sequence for a direct section link', async ({ page }) =>
   )
   await expect(page.locator('.checkpoint-progress')).toBeVisible()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Selected work in progress.',
+    'Built to be used.',
   )
 })
