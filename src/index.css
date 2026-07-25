@@ -136,10 +136,11 @@ a,
   position: absolute;
   z-index: 3;
   right: -50vw;
-  bottom: 0;
+  /* Extend the fade past the transformed edge to prevent a blue seam. */
+  bottom: -2px;
   left: -50vw;
   width: auto;
-  height: var(--scene-ground-height);
+  height: calc(var(--scene-ground-height) + 2px);
   pointer-events: none;
 }
 
@@ -166,10 +167,10 @@ a,
 .scene-ground__shade {
   background: linear-gradient(
     to bottom,
-    rgb(0 0 0 / 2%),
-    rgb(0 0 0 / 30%)
+    rgb(0 0 0 / 2%) 0%,
+    rgb(0 0 0 / 30%) 64%,
+    rgb(0 0 0) 100%
   );
-  mix-blend-mode: multiply;
 }
 
 .scene-ground__horizon {
@@ -865,6 +866,12 @@ a,
   transform: translateX(-50%);
   pointer-events: auto;
   cursor: pointer;
+}
+
+.checkpoint-progress__marker-interaction {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 
 .checkpoint-progress__marker:disabled {

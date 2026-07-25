@@ -65,6 +65,24 @@ test('supports wheel and direct checkpoint navigation', async ({ page }) => {
   )
 })
 
+test('keeps checkpoint markers centered while hovering', async ({ page }) => {
+  await openSettled(page, 'hero')
+
+  const marker = page.getByRole('button', { name: 'about checkpoint' })
+  const before = await marker.boundingBox()
+
+  expect(before).not.toBeNull()
+
+  await marker.hover()
+  await page.waitForTimeout(220)
+
+  const after = await marker.boundingBox()
+
+  expect(after).not.toBeNull()
+  expect(after!.x).toBeCloseTo(before!.x, 1)
+  expect(after!.width).toBeCloseTo(before!.width, 1)
+})
+
 test('keeps navigation bounded at the final section', async ({ page }) => {
   await openSettled(page, 'contact')
 

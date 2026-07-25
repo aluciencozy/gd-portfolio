@@ -80,26 +80,30 @@ export function CheckpointProgress({
               key={scene}
               onClick={() => onNavigate(scene)}
               type="button"
-              whileHover={isTransitioning ? undefined : { scale: 1.1, y: -2 }}
-              whileTap={isTransitioning ? undefined : { scale: 0.96 }}
               style={{ left: `${markerProgress}%` }}
             >
-              <motion.img
-                alt=""
-                animate={{ opacity: isActive ? 0 : 1, scale: isActive ? 0.9 : 1 }}
-                className="checkpoint-progress__marker-image"
-                initial={false}
-                src={checkpointAssets.unfilled}
-                transition={{ duration: 0.28, ease: EASE_OUT }}
-              />
-              <motion.img
-                alt=""
-                animate={{ opacity: isActive ? 1 : 0, scale: isActive ? 1 : 0.84 }}
-                className="checkpoint-progress__marker-image checkpoint-progress__marker-image--filled"
-                initial={false}
-                src={checkpointAssets.filled}
-                transition={{ duration: 0.36, ease: EASE_OUT }}
-              />
+              <motion.span
+                className="checkpoint-progress__marker-interaction"
+                whileHover={isTransitioning ? undefined : { scale: 1.1, y: -2 }}
+                whileTap={isTransitioning ? undefined : { scale: 0.96 }}
+              >
+                <motion.img
+                  alt=""
+                  animate={{ opacity: isActive ? 0 : 1, scale: isActive ? 0.9 : 1 }}
+                  className="checkpoint-progress__marker-image"
+                  initial={false}
+                  src={checkpointAssets.unfilled}
+                  transition={{ duration: 0.28, ease: EASE_OUT }}
+                />
+                <motion.img
+                  alt=""
+                  animate={{ opacity: isActive ? 1 : 0, scale: isActive ? 1 : 0.84 }}
+                  className="checkpoint-progress__marker-image checkpoint-progress__marker-image--filled"
+                  initial={false}
+                  src={checkpointAssets.filled}
+                  transition={{ duration: 0.36, ease: EASE_OUT }}
+                />
+              </motion.span>
             </motion.button>
           )
         })}
