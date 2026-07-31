@@ -104,7 +104,7 @@ a,
 }
 
 .opening-cube-camera {
-  z-index: 15;
+  z-index: 5;
 }
 
 .app-shell[data-opening="true"] [data-opening-progress],
@@ -1074,7 +1074,7 @@ a,
 
 .cube-anchor {
   position: absolute;
-  z-index: 15;
+  z-index: 1;
   bottom: calc(var(--scene-ground-height) - 2px);
   left: clamp(1rem, 3.2vw, 3rem);
   width: clamp(4.2rem, 7.2vw, 6.3rem);
