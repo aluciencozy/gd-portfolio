@@ -1530,3 +1530,49 @@ a,
   }
 
 }
+
+@media (max-width: 600px) and (max-height: 700px) {
+  html:has(.route-content--projects),
+  body:has(.route-content--projects) {
+    overflow-x: hidden;
+    overflow-y: auto !important;
+  }
+
+  .app-shell:has(.route-content--projects),
+  .route-stage:has(.route-content--projects) {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
+  .route-stage__layers:has(.route-content--projects),
+  .route-stage__scene:has(.route-content--projects) {
+    position: relative;
+    inset: auto;
+    height: auto;
+    min-height: 100%;
+  }
+
+  .route-content--projects {
+    position: relative;
+    inset: auto;
+    align-items: flex-start;
+    min-height: 100svh;
+    height: auto;
+    overflow: visible;
+  }
+
+  .route-content--projects .projects-layout {
+    height: auto;
+    min-height: 0;
+  }
+
+  .route-content--projects .project-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .route-content--projects .project-box {
+    height: auto;
+  }
+}
