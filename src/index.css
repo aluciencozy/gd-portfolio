@@ -498,14 +498,6 @@ a,
   white-space: nowrap;
 }
 
-.contact-panel {
-  border: 1px solid rgb(255 255 255 / 17%);
-  background:
-    linear-gradient(145deg, rgb(255 255 255 / 10%), transparent 56%),
-    rgb(4 8 25 / 46%);
-  box-shadow: 0 1.4rem 4rem rgb(0 0 0 / 18%);
-  backdrop-filter: blur(18px);
-}
 
 .experience-layout {
   display: grid;
@@ -877,54 +869,104 @@ a,
   font-weight: 800;
 }
 
-.contact-panel {
-  padding: 0.95rem;
-  border-radius: 1rem;
+.contact-console {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: clamp(0.7rem, 1.5vw, 1.15rem);
+  border: 2px solid rgb(255 255 255 / 72%);
+  border-radius: 0.25rem;
+  background: rgb(4 10 28 / 76%);
+  box-shadow: inset 0 -0.35rem 0 rgb(0 0 0 / 32%), 0 1.4rem 3rem rgb(0 0 0 / 25%);
 }
 
-.contact-panel__status {
-  display: flex;
-  gap: 0.55rem;
+.contact-status {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr auto;
+  gap: 0.7rem;
   align-items: center;
-  padding: 0.3rem 0.2rem 0.85rem;
-  color: rgb(255 255 255 / 62%);
+  min-width: 0;
+  padding: 0.15rem 0.15rem 0.7rem;
+  border-bottom: 1px solid rgb(190 255 85 / 45%);
+  color: rgb(255 255 255 / 78%);
   font-size: 0.68rem;
+  line-height: 1.35;
 }
 
-.contact-panel__status > span {
-  width: 0.5rem;
-  height: 0.5rem;
+.contact-status img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.55rem rgb(0 250 0 / 38%));
+}
+
+.contact-status__signal {
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   background: rgb(109 255 166);
   box-shadow: 0 0 0.8rem rgb(109 255 166 / 82%);
 }
 
 .contact-links {
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 0.8rem;
+  display: grid;
+  gap: 0.5rem;
 }
 
 .contact-links a {
   display: grid;
-  grid-template-columns: 0.8fr 1.2fr auto;
-  gap: 0.8rem;
+  grid-template-columns: 2rem 1fr auto;
+  gap: 0.75rem;
   align-items: center;
-  padding: 0.85rem;
-  background: rgb(0 0 0 / 10%);
+  min-width: 0;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 0.18rem;
+  background: rgb(255 255 255 / 5%);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
-.contact-links a + a {
-  border-top: 1px solid rgb(255 255 255 / 11%);
+.contact-links a:hover,
+.contact-links a:focus-visible {
+  border-color: rgb(190 255 85 / 78%);
+  background: rgb(190 255 85 / 10%);
+  transform: translateX(0.2rem);
 }
 
-.contact-links a > span:first-child {
-  color: rgb(255 255 255 / 46%);
-  font-size: 0.65rem;
+.contact-links a > img {
+  width: 1.55rem;
+  height: 1.55rem;
+  object-fit: contain;
+}
+
+.contact-links a:nth-child(3) > img {
+  width: 1.25rem;
+  justify-self: center;
+  filter: brightness(0) invert(1);
+}
+
+.contact-links a > span:nth-child(2) {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.contact-links small {
+  color: rgb(255 255 255 / 48%);
+  font-size: 0.57rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 .contact-links strong {
+  overflow-wrap: anywhere;
   font-size: 0.72rem;
+}
+
+.contact-links a > span:last-child {
+  color: rgb(190 255 85);
+  font-size: 1rem;
 }
 
 .checkpoint-progress {
@@ -1469,20 +1511,42 @@ a,
     font-size: 0.76rem;
   }
 
-  .contact-panel {
-    padding: 0.65rem;
-  }
-
-  .contact-panel__status {
-    padding-bottom: 0.6rem;
-    font-size: 0.55rem;
-  }
-
-  .contact-links a {
+  .contact-console {
+    gap: 0.6rem;
     padding: 0.62rem;
   }
 
-  .contact-links a > span:first-child,
+  .contact-status {
+    grid-template-columns: 1.8rem 1fr auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.55rem;
+  }
+
+  .contact-status img {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+
+  .contact-links {
+    gap: 0.35rem;
+  }
+
+  .contact-links a {
+    grid-template-columns: 1.55rem 1fr auto;
+    gap: 0.55rem;
+    padding: 0.5rem;
+  }
+
+  .contact-links a > img {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .contact-links small {
+    font-size: 0.48rem;
+  }
+
   .contact-links strong {
     font-size: 0.58rem;
   }
@@ -1619,5 +1683,75 @@ a,
     width: 1rem;
     height: 1rem;
     font-size: 0.45rem;
+  }
+}
+
+@media (max-width: 880px) and (max-height: 700px) {
+  .route-content--contact {
+    padding-top: clamp(4.3rem, 9svh, 5.5rem);
+    padding-bottom: calc(var(--scene-ground-height) + 0.75rem);
+  }
+
+  .route-content--contact .contact-layout {
+    gap: clamp(0.5rem, 1.5svh, 0.85rem);
+  }
+
+  .route-content--contact .section-heading h1 {
+    font-size: clamp(1.8rem, 5.8vw, 2.3rem);
+  }
+
+  .route-content--contact .route-content__eyebrow {
+    margin-bottom: 0.35rem;
+  }
+
+  .route-content--contact .route-content__body {
+    margin-top: 0.5rem;
+    font-size: clamp(0.7rem, 1.15vw, 0.82rem);
+    line-height: 1.3;
+  }
+
+  .route-content--contact .contact-email {
+    margin-top: 0.55rem;
+    font-size: clamp(0.68rem, 1vw, 0.82rem);
+  }
+
+  .route-content--contact .contact-console {
+    gap: 0.45rem;
+    padding: 0.5rem;
+  }
+
+  .route-content--contact .contact-status {
+    grid-template-columns: 1.65rem 1fr auto;
+    gap: 0.45rem;
+    padding-bottom: 0.4rem;
+    font-size: 0.58rem;
+  }
+
+  .route-content--contact .contact-status img {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .route-content--contact .contact-links {
+    gap: 0.3rem;
+  }
+
+  .route-content--contact .contact-links a {
+    grid-template-columns: 1.4rem 1fr auto;
+    gap: 0.45rem;
+    padding: 0.38rem 0.45rem;
+  }
+
+  .route-content--contact .contact-links a > img {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .route-content--contact .contact-links small {
+    font-size: 0.45rem;
+  }
+
+  .route-content--contact .contact-links strong {
+    font-size: 0.62rem;
   }
 }
