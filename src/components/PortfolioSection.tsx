@@ -5,7 +5,7 @@ import {
 } from 'motion/react'
 import type { FocusEvent, ReactElement, ReactNode } from 'react'
 import type { SceneId } from '../features/navigation/scene-navigator'
-import { heroAssets } from '../assets/asset-catalog'
+import { contactAssets, heroAssets } from '../assets/asset-catalog'
 import {
   experienceHighlights,
   projects,
@@ -419,31 +419,32 @@ function ContactSection(): ReactElement {
         </a>
       </EdgeReveal>
 
-      <EdgeReveal className="contact-panel" edge="right" order={1}>
-        <div className="contact-panel__status">
-          <span aria-hidden="true" />
-          Open to software engineering opportunities
+      <EdgeReveal className="contact-console" edge="right" order={1}>
+        <div className="contact-status">
+          <img alt="" aria-hidden="true" src={contactAssets.ball} />
+          <span>Open to software engineering opportunities</span>
+          <span className="contact-status__signal" aria-hidden="true" />
         </div>
 
         <nav aria-label="Contact links" className="contact-links">
           <a href="https://github.com/aluciencozy" rel="noreferrer" target="_blank">
-            <span>GitHub</span>
-            <strong>@aluciencozy</strong>
+            <img alt="" aria-hidden="true" src={contactAssets.orb} />
+            <span><small>GitHub</small><strong>@aluciencozy</strong></span>
             <span aria-hidden="true">↗</span>
           </a>
           <a href="https://linkedin.com/in/alcozy/" rel="noreferrer" target="_blank">
-            <span>LinkedIn</span>
-            <strong>/in/alcozy</strong>
+            <img alt="" aria-hidden="true" src={contactAssets.orb} />
+            <span><small>LinkedIn</small><strong>/in/alcozy</strong></span>
             <span aria-hidden="true">↗</span>
           </a>
           <a href="tel:+14077246962">
-            <span>Phone</span>
-            <strong>407 724 6962</strong>
+            <img alt="" aria-hidden="true" src={contactAssets.spike} />
+            <span><small>Phone</small><strong>407 724 6962</strong></span>
             <span aria-hidden="true">↗</span>
           </a>
           <a download href={resumeUrl}>
-            <span>Resume</span>
-            <strong>Download PDF</strong>
+            <img alt="" aria-hidden="true" src={contactAssets.ball} />
+            <span><small>Resume</small><strong>Download PDF</strong></span>
             <span aria-hidden="true">↓</span>
           </a>
         </nav>
