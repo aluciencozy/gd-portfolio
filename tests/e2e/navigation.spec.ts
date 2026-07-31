@@ -176,6 +176,22 @@ test('keeps cube motion state separate from visible comments', async ({
     '20',
   )
   await expect(page.locator('.route-stage')).toHaveCSS('z-index', '10')
+  const resolvedPositions = await page.evaluate(() => {
+    const cube = new DOMMatrix(
+      getComputedStyle(document.querySelector('.cube-anchor')!).transform,
+    )
+    const commentAnchor = new DOMMatrix(
+      getComputedStyle(
+        document.querySelector('.cube-comment-overlay__anchor')!,
+      ).transform,
+    )
+
+    return { commentAnchorX: commentAnchor.e, cubeX: cube.e }
+  })
+  expect(resolvedPositions.commentAnchorX).toBeCloseTo(
+    resolvedPositions.cubeX,
+    1,
+  )
   expect(
     await comment.evaluate((element) =>
       Boolean(element.closest('.opening-cube-camera')),

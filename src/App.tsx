@@ -55,6 +55,7 @@ export default function App(): ReactElement {
   const [isTransitioning, setIsTransitioning] = useState(!openingEnabled)
   const [transitionDirection, setTransitionDirection] =
     useState<NavigationDirection>('forward')
+  const [cubePositionX, setCubePositionX] = useState(0)
   const [cubeReaction, setCubeReaction] = useState<CubeReaction | null>(null)
   const [cubeComment, setCubeComment] = useState<string | null>(null)
   const reactionNonce = useRef(0)
@@ -232,6 +233,7 @@ export default function App(): ReactElement {
       >
         <RestingCube
           comment={cubeComment}
+          onPositionChange={setCubePositionX}
           paused={opening.isActive}
           reaction={cubeReaction}
         />
@@ -241,9 +243,13 @@ export default function App(): ReactElement {
         aria-hidden={opening.isActive || undefined}
         className="cube-comment-overlay"
       >
-        <div className="cube-comment-overlay__anchor">
+        <motion.div
+          animate={{ x: cubePositionX }}
+          className="cube-comment-overlay__anchor"
+          transition={{ duration: 0.72, ease: 'easeInOut' }}
+        >
           <CubeComment comment={cubeComment} paused={opening.isActive} />
-        </div>
+        </motion.div>
       </div>
 
       <div

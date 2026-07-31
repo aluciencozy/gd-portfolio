@@ -15,6 +15,7 @@ export interface CubeReaction {
 
 interface RestingCubeProps {
   comment: string | null
+  onPositionChange: (x: number) => void
   paused: boolean
   reaction: CubeReaction | null
 }
@@ -30,6 +31,7 @@ const CUBE_JUMP_DISTANCE = 44
 
 export function RestingCube({
   comment,
+  onPositionChange,
   paused,
   reaction,
 }: RestingCubeProps): ReactElement {
@@ -48,6 +50,7 @@ export function RestingCube({
     const targetX = start.x === 0 ? direction * CUBE_JUMP_DISTANCE : -start.x
     const targetRotate = start.rotate + direction * 90
     cubeMotion.current = { rotate: targetRotate, x: targetX }
+    onPositionChange(targetX)
 
     void animate(
       scope.current,
@@ -60,7 +63,7 @@ export function RestingCube({
       },
       { duration: 0.72, ease: EASE_IN_OUT, times: [0, 0.5, 1] },
     )
-  }, [animate, paused, reaction, reduceMotion, scope])
+  }, [animate, onPositionChange, paused, reaction, reduceMotion, scope])
 
   useEffect(() => {
     if (
