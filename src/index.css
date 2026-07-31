@@ -409,12 +409,17 @@ a,
 
 .about-education dt,
 .about-skill-row h3 {
+  min-width: 0;
   margin: 0;
   color: rgb(255 255 255 / 55%);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.about-skill-row h3 {
+  overflow-wrap: anywhere;
 }
 
 .about-education dd {
@@ -463,10 +468,12 @@ a,
   border-bottom: 1px solid rgb(255 255 255 / 13%);
 }
 
-.about-skill-row__chips {
+.about-skill-row__chips,
+.project-card__stack {
   display: flex;
   gap: 0.38rem;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .about-skill-chip {
@@ -475,6 +482,17 @@ a,
   border-radius: 0.2rem;
   background: rgb(255 255 255 / 6%);
   color: rgb(255 255 255 / 82%);
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.project-card__stack span {
+  padding: 0.32rem 0.48rem;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
+  color: rgb(255 255 255 / 76%);
   font-size: 0.64rem;
   font-weight: 700;
   white-space: nowrap;
