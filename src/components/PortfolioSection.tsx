@@ -245,7 +245,7 @@ function ExperienceSection(): ReactElement {
     <div
       aria-label="Work experience"
       className="experience-layout"
-      data-scene-scroll-exempt="true"
+      data-scene-scroll-container="true"
       tabIndex={0}
     >
       <EdgeReveal className="experience-heading" edge="left">

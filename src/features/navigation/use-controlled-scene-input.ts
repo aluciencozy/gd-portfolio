@@ -9,9 +9,38 @@ interface ControlledSceneInputOptions {
 }
 
 const TOUCH_THRESHOLD = 16
+const NEXT_KEYS = new Set(['ArrowDown', 'ArrowRight', 'PageDown', ' ', 'Spacebar'])
+const PREVIOUS_KEYS = new Set(['ArrowUp', 'ArrowLeft', 'PageUp'])
 
-function isSceneScrollExempt(target: EventTarget | null): boolean {
-  return target instanceof Element && Boolean(target.closest('[data-scene-scroll-exempt="true"]'))
+function getSceneScrollContainer(target: EventTarget | null): HTMLElement | null {
+  if (!(target instanceof Element)) {
+    return null
+  }
+
+  const container = target.closest('[data-scene-scroll-container="true"]')
+  return container instanceof HTMLElement ? container : null
+}
+
+function canScroll(container: HTMLElement, direction: number): boolean {
+  const maxScrollTop = container.scrollHeight - container.clientHeight
+
+  if (maxScrollTop <= 0) {
+    return false
+  }
+
+  return direction > 0 ? container.scrollTop < maxScrollTop : container.scrollTop > 0
+}
+
+function getScrollDirection(key: string): number | null {
+  if (key === 'ArrowDown' || key === 'PageDown' || key === ' ' || key === 'Spacebar') {
+    return 1
+  }
+
+  if (key === 'ArrowUp' || key === 'PageUp') {
+    return -1
+  }
+
+  return null
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -36,10 +65,17 @@ export function useControlledSceneInput({
 
   useEffect(() => {
     let touchStartY: number | null = null
-    let touchStartExempt = false
+    let touchPreviousY: number | null = null
+    let touchScrollContainer: HTMLElement | null = null
+    let touchScrollBoundary = false
 
     const handleWheel = (event: WheelEvent) => {
-      if (isSceneScrollExempt(event.target) || event.deltaY === 0) {
+      if (event.deltaY === 0) {
+        return
+      }
+
+      const scrollContainer = getSceneScrollContainer(event.target)
+      if (scrollContainer !== null && canScroll(scrollContainer, event.deltaY)) {
         return
       }
 
@@ -70,13 +106,34 @@ export function useControlledSceneInput({
     const handleTouchStart = (event: TouchEvent) => {
       const touch = event.touches[0]
       touchStartY = touch?.clientY ?? null
-      touchStartExempt = isSceneScrollExempt(event.target)
+      touchPreviousY = touchStartY
+      touchScrollContainer = getSceneScrollContainer(event.target)
+      touchScrollBoundary = false
     }
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (!touchStartExempt) {
+      if (touchScrollContainer === null) {
         event.preventDefault()
+        return
       }
+
+      const touch = event.touches[0]
+      if (touchPreviousY === null || touch === undefined) {
+        return
+      }
+
+      event.preventDefault()
+      const scrollDelta = touchPreviousY - touch.clientY
+      const maxScrollTop = Math.max(
+        0,
+        touchScrollContainer.scrollHeight - touchScrollContainer.clientHeight,
+      )
+      const desiredScrollTop = touchScrollContainer.scrollTop + scrollDelta
+      const nextScrollTop = Math.min(maxScrollTop, Math.max(0, desiredScrollTop))
+
+      touchScrollContainer.scrollTop = nextScrollTop
+      touchScrollBoundary ||= nextScrollTop !== desiredScrollTop
+      touchPreviousY = touch.clientY
     }
 
     const handleTouchEnd = (event: TouchEvent) => {
@@ -84,8 +141,9 @@ export function useControlledSceneInput({
       const touchEndY = touch?.clientY
       const deltaY = touchStartY !== null && touchEndY !== undefined ? touchEndY - touchStartY : 0
       const isSwipe = Math.abs(deltaY) >= TOUCH_THRESHOLD
+      const shouldNavigate = touchScrollContainer === null || touchScrollBoundary
 
-      if (!touchStartExempt && isSwipe) {
+      if (shouldNavigate && isSwipe) {
         event.preventDefault()
         if (!isLocked && deltaY < 0) {
           onNext()
@@ -95,36 +153,44 @@ export function useControlledSceneInput({
       }
 
       touchStartY = null
-      touchStartExempt = false
+      touchPreviousY = null
+      touchScrollContainer = null
+      touchScrollBoundary = false
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      const scrollContainer = getSceneScrollContainer(event.target)
+
       if (
         event.defaultPrevented ||
         event.repeat ||
-        isSceneScrollExempt(event.target) ||
         isEditableTarget(event.target)
       ) {
         return
       }
 
-      const nextKeys = new Set(['ArrowDown', 'ArrowRight', 'PageDown', ' ', 'Spacebar'])
-      const previousKeys = new Set(['ArrowUp', 'ArrowLeft', 'PageUp'])
       const isNavigationKey =
-        nextKeys.has(event.key) ||
-        previousKeys.has(event.key) ||
+        NEXT_KEYS.has(event.key) ||
+        PREVIOUS_KEYS.has(event.key) ||
         event.key === 'Home' ||
         event.key === 'End'
+
+      if (scrollContainer !== null) {
+        const scrollDirection = getScrollDirection(event.key)
+        if (scrollDirection !== null && canScroll(scrollContainer, scrollDirection)) {
+          return
+        }
+      }
 
       if (isLocked && isNavigationKey) {
         event.preventDefault()
         return
       }
 
-      if (nextKeys.has(event.key)) {
+      if (NEXT_KEYS.has(event.key)) {
         event.preventDefault()
         onNext()
-      } else if (previousKeys.has(event.key)) {
+      } else if (PREVIOUS_KEYS.has(event.key)) {
         event.preventDefault()
         onPrevious()
       } else if (event.key === 'Home') {
