@@ -936,6 +936,17 @@ a,
   filter: drop-shadow(0 1rem 1.2rem rgb(0 0 0 / 35%));
 }
 
+@media (min-width: 1200px) {
+  .app-shell:has(.route-content--about) .cube-anchor {
+    left: 0;
+    width: clamp(
+      3.4rem,
+      calc(max(clamp(1.1rem, 5vw, 5.5rem), (100vw - 78rem) / 2) - 0.5rem),
+      5.5rem
+    );
+  }
+}
+
 .cube-comment {
   position: absolute;
   bottom: calc(100% + 1rem);
