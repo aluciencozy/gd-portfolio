@@ -242,7 +242,12 @@ function AboutSection(): ReactElement {
 
 function ExperienceSection(): ReactElement {
   return (
-    <div className="experience-layout">
+    <div
+      aria-label="Work experience"
+      className="experience-layout"
+      data-scene-scroll-exempt="true"
+      tabIndex={0}
+    >
       <EdgeReveal className="experience-heading" edge="left">
         <SectionHeading
           eyebrow="Checkpoint 03 / Experience"
@@ -269,14 +274,14 @@ function ExperienceSection(): ReactElement {
               </dl>
             </header>
 
-            <div className="experience-metrics" aria-label="Vesta highlights">
+            <dl className="experience-metrics" aria-label="Vesta highlights">
               {experienceHighlights.map((highlight) => (
                 <div className="experience-metric" key={highlight.metric}>
-                  <strong>{highlight.metric}</strong>
-                  <span>{highlight.text}</span>
+                  <dt>{highlight.metric}</dt>
+                  <dd>{highlight.text}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
 
             <div className="experience-automation">
               <span>Also built</span>
