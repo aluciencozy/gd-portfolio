@@ -562,11 +562,6 @@ a,
   transform: rotate(45deg);
 }
 
-.experience-entry--past::before {
-  border-color: rgb(255 255 255 / 58%);
-  box-shadow: none;
-}
-
 .experience-entry article {
   min-width: 0;
   padding-bottom: 1rem;
@@ -586,10 +581,6 @@ a,
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-.experience-entry--past .experience-label {
-  color: rgb(255 255 255 / 58%);
 }
 
 .experience-entry h2 {
@@ -1297,7 +1288,7 @@ a,
     border-left: 0;
   }
 
-  .experience-metric strong {
+  .experience-metric dt {
     font-size: 0.66rem;
   }
 

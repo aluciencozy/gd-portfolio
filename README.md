@@ -27,10 +27,14 @@ npm run preview
 
 ## Inputs
 
-- Wheel or trackpad: previous and next checkpoint
-- Arrow keys, Page Up, Page Down, and Space: previous and next checkpoint
+- Wheel or trackpad: previous and next checkpoint; on Experience, scroll the
+  timeline until its boundary
+- Arrow Left and Arrow Right: previous and next checkpoint
+- Arrow Up, Arrow Down, Page Up, Page Down, and Space: previous and next
+  checkpoint; on Experience, scroll the timeline until its boundary
 - Home and End: first and last checkpoint
-- Touch swipe: previous and next checkpoint
+- Touch swipe: previous and next checkpoint; on Experience, scroll the
+  timeline until its boundary
 - Checkpoint markers: direct navigation
 
 ## Assets
