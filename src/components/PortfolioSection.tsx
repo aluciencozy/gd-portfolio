@@ -346,13 +346,13 @@ function ProjectSection({
 
           return (
             <EdgeReveal
-              className="project-card-wrap"
+              className="project-box-wrap"
               edge={edge}
               key={project.name}
               order={index + 1}
             >
               <motion.article
-                className="project-card"
+                className="project-box"
                 onBlur={clearCommentOnBlur}
                 onFocus={() => onCubeComment(project.reaction)}
                 onPointerEnter={() => onCubeComment(project.reaction)}
@@ -362,15 +362,20 @@ function ProjectSection({
                 whileHover={{ y: -6, scale: 1.012 }}
                 transition={{ duration: 0.24, ease: EASE_OUT }}
               >
-                <div className="project-card__topline">
-                  <span className="card-kicker">{project.label}</span>
+                <div className="project-box__topline">
+                  <div className="project-box__identity">
+                    <span aria-hidden="true" className="project-box__icon">
+                      <span>{String(index + 1).padStart(2, '0')}</span>
+                    </span>
+                    <span className="card-kicker">{project.label}</span>
+                  </div>
                   <span>{project.period}</span>
                 </div>
                 <h2>{project.name}</h2>
                 <strong>{project.summary}</strong>
                 <p>{project.detail}</p>
-                <div className="project-card__footer">
-                  <div className="project-card__stack">
+                <div className="project-box__footer">
+                  <div className="project-box__stack">
                     {project.stack.map((technology) => (
                       <span key={technology}>{technology}</span>
                     ))}
