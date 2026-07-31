@@ -84,12 +84,12 @@ export function CheckpointProgress({
             >
               <motion.span
                 className="checkpoint-progress__marker-interaction"
-                whileHover={isTransitioning ? undefined : { scale: 1.1, y: -2 }}
-                whileTap={isTransitioning ? undefined : { scale: 0.96 }}
+                whileHover={isTransitioning ? undefined : { opacity: 0.82 }}
+                whileTap={isTransitioning ? undefined : { opacity: 0.68 }}
               >
                 <motion.img
                   alt=""
-                  animate={{ opacity: isActive ? 0 : 1, scale: isActive ? 0.9 : 1 }}
+                  animate={{ opacity: isActive ? 0 : 1 }}
                   className="checkpoint-progress__marker-image"
                   initial={false}
                   src={checkpointAssets.unfilled}
@@ -97,7 +97,7 @@ export function CheckpointProgress({
                 />
                 <motion.img
                   alt=""
-                  animate={{ opacity: isActive ? 1 : 0, scale: isActive ? 1 : 0.84 }}
+                  animate={{ opacity: isActive ? 1 : 0 }}
                   className="checkpoint-progress__marker-image checkpoint-progress__marker-image--filled"
                   initial={false}
                   src={checkpointAssets.filled}

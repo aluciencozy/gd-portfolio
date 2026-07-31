@@ -1045,14 +1045,14 @@ a,
 .checkpoint-progress__marker {
   position: absolute;
   z-index: 3;
-  top: 50%;
+  top: -2.65rem;
   display: block;
-  width: clamp(2.5rem, 4vw, 3rem);
-  height: clamp(2.7rem, 4.8vw, 3.8rem);
+  width: clamp(1.35rem, 2.1vw, 1.65rem);
+  height: clamp(1.7rem, 2.8vw, 2.15rem);
   padding: 0;
   border: 0;
   background: transparent;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   pointer-events: auto;
   cursor: pointer;
 }
@@ -1245,8 +1245,9 @@ a,
   }
 
   .checkpoint-progress__marker {
-    width: 2.75rem;
-    height: 3rem;
+    top: -2.25rem;
+    width: 1.45rem;
+    height: 1.8rem;
   }
 
   .route-content {
