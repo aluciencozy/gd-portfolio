@@ -26,6 +26,7 @@ interface EdgeRevealProps {
   children: ReactNode
   className?: string
   edge: ScreenEdge
+  element?: 'div' | 'li'
   opening?: boolean
   order?: number
 }
@@ -73,11 +74,14 @@ function EdgeReveal({
   children,
   className = '',
   edge,
+  element = 'div',
   opening = false,
   order = 0,
 }: EdgeRevealProps): ReactElement {
+  const MotionElement = element === 'li' ? motion.li : motion.div
+
   return (
-    <motion.div
+    <MotionElement
       className={className}
       custom={{ edge, order }}
       data-edge={edge}
@@ -85,7 +89,7 @@ function EdgeReveal({
       variants={revealVariants}
     >
       {children}
-    </motion.div>
+    </MotionElement>
   )
 }
 
@@ -238,7 +242,12 @@ function AboutSection(): ReactElement {
 
 function ExperienceSection(): ReactElement {
   return (
-    <div className="experience-layout">
+    <div
+      aria-label="Work experience"
+      className="experience-layout"
+      data-scene-scroll-container="true"
+      tabIndex={0}
+    >
       <EdgeReveal className="experience-heading" edge="left">
         <SectionHeading
           eyebrow="Checkpoint 03 / Experience"
@@ -251,45 +260,58 @@ function ExperienceSection(): ReactElement {
         </p>
       </EdgeReveal>
 
-      <EdgeReveal className="experience-card" edge="right" order={1}>
-        <div className="experience-card__topline">
-          <div>
-            <span className="card-kicker">Vesta Teleradiology</span>
-            <h2>Software Engineering Intern</h2>
-          </div>
-          <div className="experience-card__meta">
-            <span>Feb 2026 - Present</span>
-            <span>Lake Mary, FL</span>
-          </div>
-        </div>
+      <ol className="experience-timeline" aria-label="Work experience">
+        <EdgeReveal element="li" className="experience-entry experience-entry--current" edge="right" order={1}>
+          <article>
+            <header className="experience-entry__header">
+              <div>
+                <span className="experience-label">01 / Vesta Teleradiology</span>
+                <h2>Software Engineering Intern</h2>
+              </div>
+              <dl className="experience-entry__meta">
+                <div><dt>Dates</dt><dd>Feb 2026 - Present</dd></div>
+                <div><dt>Location</dt><dd>Lake Mary, FL</dd></div>
+              </dl>
+            </header>
 
-        <div className="experience-grid">
-          {experienceHighlights.map((highlight) => (
-            <div className="experience-highlight" key={highlight.metric}>
-              <strong>{highlight.metric}</strong>
-              <span>{highlight.text}</span>
+            <dl className="experience-metrics" aria-label="Vesta highlights">
+              {experienceHighlights.map((highlight) => (
+                <div className="experience-metric" key={highlight.metric}>
+                  <dt>{highlight.metric}</dt>
+                  <dd>{highlight.text}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="experience-automation">
+              <span>Also built</span>
+              <p>
+                n8n webhook workflows for credentialing status emails and real-time
+                system alerts.
+              </p>
             </div>
-          ))}
-        </div>
+          </article>
+        </EdgeReveal>
 
-        <div className="experience-card__automation">
-          <span>Also built</span>
-          <p>
-            n8n webhook workflows for credentialing status emails and real-time
-            system alerts.
-          </p>
-        </div>
-      </EdgeReveal>
-
-      <EdgeReveal className="secondary-role" edge="left" order={2}>
-        <span className="card-kicker">Hilton Food and Beverage</span>
-        <strong>Food and Beverage Attendant</strong>
-        <span>Jun 2024 - Present / Sanford, FL</span>
-        <p>
-          Fast-paced guest service, cross-functional teamwork, inventory, and
-          real-time problem solving.
-        </p>
-      </EdgeReveal>
+        <EdgeReveal element="li" className="experience-entry experience-entry--current" edge="left" order={2}>
+          <article>
+            <header className="experience-entry__header">
+              <div>
+                <span className="experience-label">02 / Hilton Food and Beverage</span>
+                <h2>Food and Beverage Attendant</h2>
+              </div>
+              <dl className="experience-entry__meta">
+                <div><dt>Dates</dt><dd>Jun 2024 - Present</dd></div>
+                <div><dt>Location</dt><dd>Sanford, FL</dd></div>
+              </dl>
+            </header>
+            <p className="experience-entry__copy">
+              Fast-paced guest service, cross-functional teamwork, inventory, and
+              real-time problem solving.
+            </p>
+          </article>
+        </EdgeReveal>
+      </ol>
     </div>
   )
 }
