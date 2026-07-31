@@ -979,6 +979,8 @@ a,
 .checkpoint-progress {
   position: fixed;
   z-index: 20;
+  --checkpoint-marker-gap: 0.35rem;
+  --checkpoint-marker-height: clamp(1.7rem, 2.8vw, 2.15rem);
   top: max(0.7rem, calc(2.8svh + env(safe-area-inset-top)));
   right: 0;
   left: 0;
@@ -1004,6 +1006,9 @@ a,
   position: relative;
   z-index: 0;
   width: min(760px, calc(100vw - 4rem));
+  margin-top: calc(
+    var(--checkpoint-marker-height) + var(--checkpoint-marker-gap)
+  );
   aspect-ratio: 840 / 48;
   pointer-events: auto;
 }
@@ -1045,14 +1050,16 @@ a,
 .checkpoint-progress__marker {
   position: absolute;
   z-index: 3;
-  top: 50%;
+  top: calc(
+    -1 * var(--checkpoint-marker-height) - var(--checkpoint-marker-gap)
+  );
   display: block;
-  width: clamp(2.5rem, 4vw, 3rem);
-  height: clamp(2.7rem, 4.8vw, 3.8rem);
+  width: clamp(1.35rem, 2.1vw, 1.65rem);
+  height: var(--checkpoint-marker-height);
   padding: 0;
   border: 0;
   background: transparent;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   pointer-events: auto;
   cursor: pointer;
 }
@@ -1236,6 +1243,7 @@ a,
   }
 
   .checkpoint-progress {
+    --checkpoint-marker-height: 1.8rem;
     top: max(0.55rem, env(safe-area-inset-top));
   }
 
@@ -1245,8 +1253,7 @@ a,
   }
 
   .checkpoint-progress__marker {
-    width: 2.75rem;
-    height: 3rem;
+    width: 1.45rem;
   }
 
   .route-content {
