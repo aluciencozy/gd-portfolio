@@ -5,6 +5,11 @@ import cubeAsset from './characters/cube.svg'
 import progressFillAsset from './ui/sliderBar-uhd.png'
 import progressGrooveAsset from './ui/slidergroove-uhd.png'
 import groundAsset from '../../assets/ground-square.png'
+import downloadIconAsset from './ui/hero/GJ_downloadBtn_001.png'
+import nameAsset from './ui/hero/gd-name-two-lines-left-aligned.png'
+import resumeButtonAsset from './ui/hero/GJ_longBtn03_001.png'
+import workButtonAsset from './ui/hero/GJ_longBtn02_001.png'
+import workIconAsset from './ui/hero/GJ_playBtn_001.png'
 
 export const characterAssets = {
   cube: cubeAsset,
@@ -23,4 +28,12 @@ export const checkpointAssets = {
 export const progressAssets = {
   fill: progressFillAsset,
   groove: progressGrooveAsset,
+} as const
+
+export const heroAssets = {
+  name: nameAsset,
+  resumeButton: resumeButtonAsset,
+  workButton: workButtonAsset,
+  downloadIcon: downloadIconAsset,
+  workIcon: workIconAsset,
 } as const

@@ -5,6 +5,7 @@ import {
 } from 'motion/react'
 import type { FocusEvent, ReactElement, ReactNode } from 'react'
 import type { SceneId } from '../features/navigation/scene-navigator'
+import { heroAssets } from '../assets/asset-catalog'
 import {
   experienceHighlights,
   projects,
@@ -121,8 +122,12 @@ function HeroSection({
           Software engineer / UCF computer science
         </p>
         <h1 data-opening-heading id="hero-heading">
-          Alex
-          <span> Cosentino</span>
+          <span className="sr-only">Alex Cosentino</span>
+          <img
+            alt="Alex Cosentino"
+            className="hero-copy__name"
+            src={heroAssets.name}
+          />
         </h1>
         <p className="hero-copy__lede" data-opening-body>
           I build dependable full-stack products with playful, high-polish
@@ -136,42 +141,39 @@ function HeroSection({
         opening
         order={1}
       >
-        <a className="button button--primary" download href={resumeUrl}>
-          Download resume
-          <span aria-hidden="true">↓</span>
+        <a
+          className="hero-button hero-button--primary"
+          download
+          href={resumeUrl}
+          style={{ backgroundImage: `url(${heroAssets.resumeButton})` }}
+        >
+          <span className="hero-button__copy">Download resume</span>
+          <img
+            alt=""
+            aria-hidden="true"
+            className="hero-button__icon"
+            src={heroAssets.downloadIcon}
+          />
         </a>
         <a
-          className="button button--ghost"
+          className="hero-button hero-button--secondary"
           href="#projects"
           onClick={(event) => {
             event.preventDefault()
             onNavigate('projects')
           }}
+          style={{ backgroundImage: `url(${heroAssets.workButton})` }}
         >
-          Selected work
-          <span aria-hidden="true">↗</span>
+          <span className="hero-button__copy">Selected work</span>
+          <img
+            alt=""
+            aria-hidden="true"
+            className="hero-button__icon"
+            src={heroAssets.workIcon}
+          />
         </a>
       </EdgeReveal>
 
-      <EdgeReveal
-        className="hero-proof"
-        edge="right"
-        opening
-        order={2}
-      >
-        <div>
-          <span className="hero-proof__value">50K+</span>
-          <span className="hero-proof__label">records migrated</span>
-        </div>
-        <div>
-          <span className="hero-proof__value">4.0</span>
-          <span className="hero-proof__label">UCF GPA</span>
-        </div>
-        <div>
-          <span className="hero-proof__value">Full stack</span>
-          <span className="hero-proof__label">product focus</span>
-        </div>
-      </EdgeReveal>
     </div>
   )
 }
