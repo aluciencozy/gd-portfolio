@@ -498,6 +498,16 @@ a,
   white-space: nowrap;
 }
 
+.project-card,
+.contact-panel {
+  border: 1px solid rgb(255 255 255 / 17%);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 10%), transparent 56%),
+    rgb(4 8 25 / 46%);
+  box-shadow: 0 1.4rem 4rem rgb(0 0 0 / 18%);
+  backdrop-filter: blur(18px);
+}
+
 .experience-layout {
   display: grid;
   grid-template-columns: minmax(16rem, 0.42fr) minmax(32rem, 0.58fr);

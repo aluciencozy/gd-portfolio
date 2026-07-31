@@ -275,7 +275,7 @@ function ExperienceSection(): ReactElement {
             </div>
 
             <div className="experience-automation">
-              <span>Bonus build</span>
+              <span>Also built</span>
               <p>
                 n8n webhook workflows for credentialing status emails and real-time
                 system alerts.
@@ -284,7 +284,7 @@ function ExperienceSection(): ReactElement {
           </article>
         </EdgeReveal>
 
-        <EdgeReveal className="experience-entry experience-entry--past" edge="left" order={2}>
+        <EdgeReveal className="experience-entry experience-entry--current" edge="left" order={2}>
           <article>
             <header className="experience-entry__header">
               <div>
