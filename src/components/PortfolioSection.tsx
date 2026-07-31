@@ -26,6 +26,7 @@ interface EdgeRevealProps {
   children: ReactNode
   className?: string
   edge: ScreenEdge
+  element?: 'div' | 'li'
   opening?: boolean
   order?: number
 }
@@ -73,11 +74,14 @@ function EdgeReveal({
   children,
   className = '',
   edge,
+  element = 'div',
   opening = false,
   order = 0,
 }: EdgeRevealProps): ReactElement {
+  const MotionElement = element === 'li' ? motion.li : motion.div
+
   return (
-    <motion.div
+    <MotionElement
       className={className}
       custom={{ edge, order }}
       data-edge={edge}
@@ -85,7 +89,7 @@ function EdgeReveal({
       variants={revealVariants}
     >
       {children}
-    </motion.div>
+    </MotionElement>
   )
 }
 
@@ -251,8 +255,8 @@ function ExperienceSection(): ReactElement {
         </p>
       </EdgeReveal>
 
-      <div className="experience-timeline" aria-label="Work experience">
-        <EdgeReveal className="experience-entry experience-entry--current" edge="right" order={1}>
+      <ol className="experience-timeline" aria-label="Work experience">
+        <EdgeReveal element="li" className="experience-entry experience-entry--current" edge="right" order={1}>
           <article>
             <header className="experience-entry__header">
               <div>
@@ -284,7 +288,7 @@ function ExperienceSection(): ReactElement {
           </article>
         </EdgeReveal>
 
-        <EdgeReveal className="experience-entry experience-entry--current" edge="left" order={2}>
+        <EdgeReveal element="li" className="experience-entry experience-entry--current" edge="left" order={2}>
           <article>
             <header className="experience-entry__header">
               <div>
@@ -302,7 +306,7 @@ function ExperienceSection(): ReactElement {
             </p>
           </article>
         </EdgeReveal>
-      </div>
+      </ol>
     </div>
   )
 }

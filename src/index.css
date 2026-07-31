@@ -510,21 +510,25 @@ a,
 
 .experience-layout {
   display: grid;
-  grid-template-columns: minmax(16rem, 0.42fr) minmax(32rem, 0.58fr);
+  grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
   gap: clamp(1rem, 4vw, 4.8rem);
   align-items: center;
+  min-width: 0;
 }
 
 .experience-heading {
   align-self: center;
+  min-width: 0;
 }
 
 .experience-timeline {
   position: relative;
   display: grid;
   gap: clamp(1.2rem, 3svh, 2.1rem);
+  margin: 0;
   min-width: 0;
   padding-left: clamp(1.2rem, 2vw, 1.8rem);
+  list-style: none;
 }
 
 .experience-timeline::before {
