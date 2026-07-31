@@ -26,8 +26,11 @@
 
 ## Cube
 
-- Persistent, continuous idle motion between interactions.
-- Directional hops for successful navigation and bounded-endpoint feedback.
+- Persistent, continuous idle motion between interactions when reduced motion
+  is not requested.
+- Navigation hops use a restrained gravity-like arc, rotate 90 degrees, and
+  land on the opposite side; bounded endpoints still provide directional
+  feedback.
 - Project-specific reactions on hover and keyboard focus.
 - Motion-based speech card entrance and exit.
 

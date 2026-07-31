@@ -7,7 +7,8 @@ and Contact.
 Wheel input, touch swipes, keyboard commands, checkpoint buttons, browser
 history, and direct hash links all use the same bounded scene navigator. Motion
 handles the edge-aware content choreography, checkpoint progress, scene color
-crossfades, opening sequence, cube reactions, and continuous cube idle motion.
+crossfades, opening sequence, cube reactions, and continuous cube idle motion
+that respects reduced-motion preferences.
 
 The project data is centralized in
 `src/components/portfolio-data.ts`, including the skills and project arrays.
