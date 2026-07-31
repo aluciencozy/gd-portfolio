@@ -7,7 +7,11 @@ import {
   type ReactElement,
 } from 'react'
 import { CheckpointProgress } from './components/CheckpointProgress'
-import { RestingCube, type CubeReaction } from './components/RestingCube'
+import {
+  CubeComment,
+  RestingCube,
+  type CubeReaction,
+} from './components/RestingCube'
 import { RouteStage } from './components/RouteStage'
 import {
   sceneHash,
@@ -231,6 +235,15 @@ export default function App(): ReactElement {
           paused={opening.isActive}
           reaction={cubeReaction}
         />
+      </div>
+
+      <div
+        aria-hidden={opening.isActive || undefined}
+        className="cube-comment-overlay"
+      >
+        <div className="cube-comment-overlay__anchor">
+          <CubeComment comment={cubeComment} paused={opening.isActive} />
+        </div>
       </div>
 
       <div

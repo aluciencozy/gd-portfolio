@@ -107,6 +107,13 @@ a,
   z-index: 5;
 }
 
+.cube-comment-overlay {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  pointer-events: none;
+}
+
 .app-shell[data-opening="true"] [data-opening-progress],
 .app-shell[data-opening="true"] [data-opening-content] {
   visibility: hidden;
@@ -1072,13 +1079,25 @@ a,
   pointer-events: none;
 }
 
-.cube-anchor {
+.cube-anchor,
+.cube-comment-overlay__anchor {
   position: absolute;
-  z-index: 1;
   bottom: calc(var(--scene-ground-height) - 2px);
   left: clamp(1rem, 3.2vw, 3rem);
   width: clamp(4.2rem, 7.2vw, 6.3rem);
+}
+
+.cube-anchor {
+  z-index: 1;
   pointer-events: none;
+}
+
+.cube-comment-overlay__anchor {
+  pointer-events: none;
+}
+
+.cube-anchor__reaction {
+  width: 100%;
 }
 
 .cube-anchor__idle {
@@ -1094,7 +1113,8 @@ a,
 }
 
 @media (min-width: 1200px) {
-  .app-shell:has(.route-content--about) .cube-anchor {
+  .app-shell:has(.route-content--about) .cube-anchor,
+  .app-shell:has(.route-content--about) .cube-comment-overlay__anchor {
     left: 0;
     width: clamp(
       3.4rem,
@@ -1551,7 +1571,8 @@ a,
     font-size: 0.58rem;
   }
 
-  .cube-anchor {
+  .cube-anchor,
+  .cube-comment-overlay__anchor {
     left: 0.7rem;
     width: clamp(3.4rem, 15vw, 4.2rem);
   }
