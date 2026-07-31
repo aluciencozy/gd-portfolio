@@ -1532,47 +1532,92 @@ a,
 }
 
 @media (max-width: 600px) and (max-height: 700px) {
-  html:has(.route-content--projects),
-  body:has(.route-content--projects) {
-    overflow-x: hidden;
-    overflow-y: auto !important;
+  .project-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 0.3rem;
   }
 
-  .app-shell:has(.route-content--projects),
-  .route-stage:has(.route-content--projects) {
-    height: auto;
-    min-height: 100svh;
-    overflow: visible;
+  .project-box {
+    padding: 0.35rem;
   }
 
-  .route-stage__layers:has(.route-content--projects),
-  .route-stage__scene:has(.route-content--projects) {
-    position: relative;
-    inset: auto;
-    height: auto;
-    min-height: 100%;
+  .project-box__topline {
+    flex-wrap: nowrap;
+    gap: 0.3rem;
   }
 
-  .route-content--projects {
-    position: relative;
-    inset: auto;
-    align-items: flex-start;
-    min-height: 100svh;
-    height: auto;
-    overflow: visible;
+  .project-box__identity {
+    flex: 1 1 auto;
+    gap: 0.3rem;
   }
 
-  .route-content--projects .projects-layout {
-    height: auto;
-    min-height: 0;
+  .project-box__icon {
+    width: 1.25rem;
+    height: 1rem;
+    border-width: 1px;
+    font-size: 0.3rem;
   }
 
-  .route-content--projects .project-grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
+  .project-box__icon::before {
+    top: -0.25rem;
+    left: -1px;
+    width: 0.5rem;
+    height: 0.25rem;
+    border-width: 1px;
   }
 
-  .route-content--projects .project-box {
-    height: auto;
+  .project-box__icon::after {
+    inset: 0.16rem;
+    border-width: 1px;
+  }
+
+  .project-box__topline .card-kicker {
+    font-size: 0.34rem;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+  }
+
+  .project-box__topline > span:last-child {
+    margin-left: 0;
+    font-size: 0.34rem;
+  }
+
+  .project-box h2 {
+    margin-top: 0.25rem;
+    font-size: 0.58rem;
+    line-height: 1;
+  }
+
+  .project-box > strong {
+    margin-top: 0.15rem;
+    font-size: 0.38rem;
+    line-height: 1.15;
+  }
+
+  .project-box > p {
+    margin-top: 0.2rem;
+    font-size: 0.32rem;
+    line-height: 1.15;
+  }
+
+  .project-box__footer {
+    gap: 0.25rem;
+    padding-top: 0.25rem;
+  }
+
+  .project-box__stack {
+    gap: 0.12rem;
+  }
+
+  .project-box__stack span {
+    padding: 0.12rem 0.16rem;
+    font-size: 0.3rem;
+  }
+
+  .project-box__footer a {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.45rem;
   }
 }
