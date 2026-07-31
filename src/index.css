@@ -498,136 +498,168 @@ a,
   white-space: nowrap;
 }
 
-.experience-card,
-.secondary-role,
-.project-card,
-.contact-panel {
-  border: 1px solid rgb(255 255 255 / 17%);
-  background:
-    linear-gradient(145deg, rgb(255 255 255 / 10%), transparent 56%),
-    rgb(4 8 25 / 46%);
-  box-shadow: 0 1.4rem 4rem rgb(0 0 0 / 18%);
-  backdrop-filter: blur(18px);
-}
-
 .experience-layout {
   display: grid;
   grid-template-columns: minmax(16rem, 0.42fr) minmax(32rem, 0.58fr);
-  grid-template-rows: 1fr auto;
-  gap: clamp(1rem, 2.2vw, 2rem);
-  align-items: stretch;
+  gap: clamp(1rem, 4vw, 4.8rem);
+  align-items: center;
 }
 
 .experience-heading {
   align-self: center;
 }
 
-.experience-card {
-  padding: clamp(1rem, 2.2vw, 1.5rem);
-  border-radius: 1.1rem;
+.experience-timeline {
+  position: relative;
+  display: grid;
+  gap: clamp(1.2rem, 3svh, 2.1rem);
+  min-width: 0;
+  padding-left: clamp(1.2rem, 2vw, 1.8rem);
 }
 
-.experience-card__topline {
+.experience-timeline::before {
+  position: absolute;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  left: 0.2rem;
+  width: 2px;
+  background: linear-gradient(rgb(190 255 85), rgb(190 255 85 / 18%));
+  content: "";
+}
+
+.experience-entry {
+  position: relative;
+  min-width: 0;
+}
+
+.experience-entry::before {
+  position: absolute;
+  top: 0.55rem;
+  left: clamp(-1.9rem, -2vw, -1.3rem);
+  width: 0.62rem;
+  height: 0.62rem;
+  border: 2px solid rgb(190 255 85);
+  background: rgb(2 6 23);
+  box-shadow: 0 0 0 0.2rem rgb(190 255 85 / 12%);
+  content: "";
+  transform: rotate(45deg);
+}
+
+.experience-entry--past::before {
+  border-color: rgb(255 255 255 / 58%);
+  box-shadow: none;
+}
+
+.experience-entry article {
+  min-width: 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgb(255 255 255 / 24%);
+}
+
+.experience-entry__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.experience-card__topline h2 {
-  margin: 0.3rem 0 0;
-  font-size: clamp(1.2rem, 2vw, 1.7rem);
-  letter-spacing: 0.02em;
-}
-
-.experience-card__meta {
-  display: flex;
-  flex: none;
-  color: rgb(255 255 255 / 52%);
-  font-size: 0.67rem;
-  line-height: 1.45;
-  text-align: right;
-  flex-direction: column;
-}
-
-.experience-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin-top: 1rem;
-}
-
-.experience-highlight {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.7rem;
-  align-items: start;
-  min-height: 4.5rem;
-  padding: 0.78rem;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 0.75rem;
-  background: rgb(0 0 0 / 12%);
-}
-
-.experience-highlight strong {
-  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
-}
-
-.experience-highlight span {
-  color: rgb(255 255 255 / 62%);
-  font-size: 0.68rem;
-  line-height: 1.45;
-}
-
-.experience-card__automation {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.8rem;
-  align-items: baseline;
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid rgb(255 255 255 / 12%);
-}
-
-.experience-card__automation span {
-  color: rgb(255 255 255 / 45%);
-  font-size: 0.65rem;
+.experience-label {
+  color: rgb(190 255 85);
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.experience-card__automation p {
-  margin: 0;
-  color: rgb(255 255 255 / 68%);
-  font-size: 0.72rem;
-  line-height: 1.45;
+.experience-entry--past .experience-label {
+  color: rgb(255 255 255 / 58%);
 }
 
-.secondary-role {
-  grid-column: 1 / -1;
+.experience-entry h2 {
+  margin: 0.32rem 0 0;
+  font-size: clamp(1.05rem, 1.8vw, 1.5rem);
+  line-height: 1.1;
+}
+
+.experience-entry__meta {
   display: grid;
-  grid-template-columns: 0.85fr 1.2fr 0.8fr 1.6fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 0.9rem 1.1rem;
-  border-radius: 0.9rem;
-}
-
-.secondary-role strong {
-  font-size: 0.82rem;
-}
-
-.secondary-role > span:nth-child(3) {
-  color: rgb(255 255 255 / 49%);
-  font-size: 0.66rem;
-}
-
-.secondary-role p {
+  flex: none;
+  gap: 0.3rem;
   margin: 0;
   color: rgb(255 255 255 / 58%);
+  font-size: 0.62rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.experience-entry__meta div {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.experience-entry__meta dt {
+  color: rgb(255 255 255 / 36%);
+  text-transform: uppercase;
+}
+
+.experience-entry__meta dd {
+  margin: 0;
+}
+
+.experience-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+  border-top: 1px solid rgb(255 255 255 / 18%);
+}
+
+.experience-metric {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: baseline;
+  padding: 0.72rem 0.7rem 0.72rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
+}
+
+.experience-metric:nth-child(even) {
+  padding-left: 0.7rem;
+  border-left: 1px solid rgb(255 255 255 / 14%);
+}
+
+.experience-metric strong {
+  color: rgb(190 255 85);
+  font-size: clamp(0.82rem, 1.1vw, 1rem);
+}
+
+.experience-metric span,
+.experience-entry__copy,
+.experience-automation p {
+  margin: 0;
+  color: rgb(255 255 255 / 64%);
   font-size: 0.67rem;
   line-height: 1.45;
+}
+
+.experience-automation {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.experience-automation span {
+  color: rgb(255 255 255 / 43%);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.experience-entry__copy {
+  max-width: 42rem;
+  margin-top: 0.75rem;
 }
 
 .projects-layout {
@@ -1034,7 +1066,7 @@ a,
   }
 
   .experience-layout {
-    grid-template-rows: auto 1fr auto;
+    gap: 1.3rem;
   }
 
   .experience-heading {
@@ -1045,10 +1077,6 @@ a,
 
   .experience-heading > * {
     flex: 1;
-  }
-
-  .secondary-role {
-    grid-column: 1;
   }
 
   .contact-layout {
@@ -1182,7 +1210,7 @@ a,
   }
 
   .experience-layout {
-    gap: 0.55rem;
+    gap: 0.8rem;
   }
 
   .experience-heading {
@@ -1193,66 +1221,82 @@ a,
     display: none;
   }
 
-  .experience-card {
-    padding: 0.72rem;
+  .experience-timeline {
+    gap: 0.9rem;
+    padding-left: 1.05rem;
   }
 
-  .experience-card__topline h2 {
-    font-size: 1rem;
+  .experience-timeline::before {
+    left: 0.15rem;
   }
 
-  .experience-card__meta {
-    font-size: 0.53rem;
+  .experience-entry::before {
+    left: -1.28rem;
+    width: 0.5rem;
+    height: 0.5rem;
   }
 
-  .experience-grid {
-    gap: 0.4rem;
+  .experience-entry article {
+    padding-bottom: 0.7rem;
+  }
+
+  .experience-entry__header {
+    display: block;
+  }
+
+  .experience-label {
+    font-size: 0.5rem;
+  }
+
+  .experience-entry h2 {
+    margin-top: 0.24rem;
+    font-size: 0.86rem;
+  }
+
+  .experience-entry__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.7rem;
+    margin-top: 0.45rem;
+    font-size: 0.5rem;
+    text-align: left;
+  }
+
+  .experience-entry__meta div {
+    justify-content: flex-start;
+  }
+
+  .experience-metrics {
+    grid-template-columns: 1fr;
     margin-top: 0.65rem;
   }
 
-  .experience-highlight {
-    grid-template-columns: 1fr;
-    gap: 0.18rem;
-    min-height: 0;
-    padding: 0.52rem;
+  .experience-metric,
+  .experience-metric:nth-child(even) {
+    grid-template-columns: auto 1fr;
+    gap: 0.45rem;
+    padding: 0.42rem 0;
+    border-left: 0;
   }
 
-  .experience-highlight strong {
-    font-size: 0.72rem;
+  .experience-metric strong {
+    font-size: 0.66rem;
   }
 
-  .experience-highlight span {
-    font-size: 0.55rem;
+  .experience-metric span,
+  .experience-entry__copy,
+  .experience-automation p {
+    font-size: 0.52rem;
     line-height: 1.35;
   }
 
-  .experience-card__automation {
+  .experience-automation {
     gap: 0.45rem;
     margin-top: 0.55rem;
-    padding-top: 0.55rem;
   }
 
-  .experience-card__automation span,
-  .experience-card__automation p {
-    font-size: 0.52rem;
-  }
-
-  .secondary-role {
-    grid-template-columns: 1fr 1.4fr;
-    gap: 0.25rem 0.6rem;
-    padding: 0.62rem 0.7rem;
-  }
-
-  .secondary-role strong {
-    font-size: 0.65rem;
-  }
-
-  .secondary-role > span:nth-child(3) {
-    font-size: 0.52rem;
-  }
-
-  .secondary-role p {
-    display: none;
+  .experience-automation span {
+    font-size: 0.48rem;
   }
 
   .projects-layout {
@@ -1392,7 +1436,4 @@ a,
     display: none;
   }
 
-  .secondary-role p {
-    display: none;
-  }
 }
