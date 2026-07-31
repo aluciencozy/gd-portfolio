@@ -740,6 +740,7 @@ a,
   position: relative;
   z-index: 1;
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -750,6 +751,11 @@ a,
   min-width: 0;
   align-items: center;
   gap: 0.6rem;
+}
+
+.project-box__identity .card-kicker {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .project-box__icon {
@@ -1403,7 +1409,17 @@ a,
     letter-spacing: 0.1em;
   }
 
+  .project-box__topline {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+  }
+
+  .project-box__identity {
+    flex: 1 1 100%;
+  }
+
   .project-box__topline > span:last-child {
+    margin-left: auto;
     font-size: 0.48rem;
   }
 
