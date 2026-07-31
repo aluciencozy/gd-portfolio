@@ -16,6 +16,25 @@ async function openSettled(page: Page, scene: string): Promise<void> {
   )
 }
 
+async function readCubeTransform(page: Page): Promise<{
+  rotation: number
+  scaleX: number
+  scaleY: number
+  x: number
+}> {
+  return page.locator('.cube-anchor').evaluate((element) => {
+    const transform = getComputedStyle(element).transform
+    const matrix = new DOMMatrix(transform === 'none' ? undefined : transform)
+
+    return {
+      rotation: Math.atan2(matrix.b, matrix.a) * (180 / Math.PI),
+      scaleX: Math.hypot(matrix.a, matrix.b),
+      scaleY: Math.hypot(matrix.c, matrix.d),
+      x: matrix.e,
+    }
+  })
+}
+
 test('animates content, progress, and theme between sections', async ({
   page,
 }) => {
@@ -106,4 +125,100 @@ test('lets project cards prompt a cube reaction', async ({ page }) => {
   await expect(page.locator('.cube-comment')).toContainText(
     'My favorite boss battle',
   )
+})
+
+test('keeps cube motion state separate from visible comments', async ({
+  page,
+}) => {
+  await openSettled(page, 'hero')
+
+  await page.keyboard.press('ArrowRight')
+  await expect(page).toHaveURL(/#about$/)
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-transitioning',
+    'false',
+  )
+  const firstLanding = await readCubeTransform(page)
+
+  await page.keyboard.press('ArrowRight')
+  await expect(page).toHaveURL(/#experience$/)
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-transitioning',
+    'false',
+  )
+  const secondLanding = await readCubeTransform(page)
+
+  expect(firstLanding.x).toBeGreaterThan(0)
+  expect(secondLanding.x).toBeLessThan(0)
+  expect(Math.abs(secondLanding.rotation - firstLanding.rotation)).toBeCloseTo(
+    90,
+    0,
+  )
+  expect(firstLanding.scaleX).toBeCloseTo(1, 2)
+  expect(firstLanding.scaleY).toBeCloseTo(1, 2)
+  expect(secondLanding.scaleX).toBeCloseTo(1, 2)
+  expect(secondLanding.scaleY).toBeCloseTo(1, 2)
+
+  await page.getByRole('button', { name: 'projects checkpoint' }).click()
+  await expect(page).toHaveURL(/#projects$/)
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-transitioning',
+    'false',
+  )
+
+  const beforeComment = await readCubeTransform(page)
+  await page.getByText('Demonlist Ultimate').hover()
+  const comment = page.locator('.cube-comment')
+  await expect(comment).toContainText('My favorite boss battle')
+  await expect(comment).toBeVisible()
+  await expect(page.locator('.cube-comment-overlay')).toHaveCSS(
+    'z-index',
+    '20',
+  )
+  await expect(page.locator('.route-stage')).toHaveCSS('z-index', '10')
+  const resolvedPositions = await page.evaluate(() => {
+    const cube = new DOMMatrix(
+      getComputedStyle(document.querySelector('.cube-anchor')!).transform,
+    )
+    const commentAnchor = new DOMMatrix(
+      getComputedStyle(
+        document.querySelector('.cube-comment-overlay__anchor')!,
+      ).transform,
+    )
+
+    return { commentAnchorX: commentAnchor.e, cubeX: cube.e }
+  })
+  expect(resolvedPositions.commentAnchorX).toBeCloseTo(
+    resolvedPositions.cubeX,
+    1,
+  )
+  const verticalPositions = await page.evaluate(() => {
+    const cube = document.querySelector('.cube-anchor')!.getBoundingClientRect()
+    const anchor = document
+      .querySelector('.cube-comment-overlay__anchor')!
+      .getBoundingClientRect()
+    const comment = document.querySelector('.cube-comment')!.getBoundingClientRect()
+
+    return {
+      anchorTop: anchor.top,
+      commentBottom: comment.bottom,
+      cubeTop: cube.top,
+    }
+  })
+  expect(verticalPositions.commentBottom).toBeLessThan(
+    verticalPositions.anchorTop,
+  )
+  expect(verticalPositions.commentBottom).toBeLessThan(
+    verticalPositions.cubeTop,
+  )
+  expect(
+    await comment.evaluate((element) =>
+      Boolean(element.closest('.opening-cube-camera')),
+    ),
+  ).toBe(false)
+
+  await page.waitForTimeout(100)
+  const afterComment = await readCubeTransform(page)
+  expect(afterComment.x).toBeCloseTo(beforeComment.x, 1)
+  expect(afterComment.rotation).toBeCloseTo(beforeComment.rotation, 1)
 })
