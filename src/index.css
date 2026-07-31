@@ -1093,6 +1093,7 @@ a,
 }
 
 .cube-comment-overlay__anchor {
+  aspect-ratio: 129 / 128;
   pointer-events: none;
 }
 

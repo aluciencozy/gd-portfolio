@@ -192,6 +192,25 @@ test('keeps cube motion state separate from visible comments', async ({
     resolvedPositions.cubeX,
     1,
   )
+  const verticalPositions = await page.evaluate(() => {
+    const cube = document.querySelector('.cube-anchor')!.getBoundingClientRect()
+    const anchor = document
+      .querySelector('.cube-comment-overlay__anchor')!
+      .getBoundingClientRect()
+    const comment = document.querySelector('.cube-comment')!.getBoundingClientRect()
+
+    return {
+      anchorTop: anchor.top,
+      commentBottom: comment.bottom,
+      cubeTop: cube.top,
+    }
+  })
+  expect(verticalPositions.commentBottom).toBeLessThan(
+    verticalPositions.anchorTop,
+  )
+  expect(verticalPositions.commentBottom).toBeLessThan(
+    verticalPositions.cubeTop,
+  )
   expect(
     await comment.evaluate((element) =>
       Boolean(element.closest('.opening-cube-camera')),
