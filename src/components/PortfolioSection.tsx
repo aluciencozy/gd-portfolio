@@ -194,33 +194,43 @@ function AboutSection(): ReactElement {
           that feel alive.
         </p>
 
-        <div className="education-card">
-          <div>
-            <span className="card-kicker">Education</span>
-            <strong>University of Central Florida</strong>
-            <span>Computer Science B.S. / Aug 2024 - Present</span>
+        <dl className="about-education" aria-label="Education">
+          <div className="about-education__row">
+            <dt>Education</dt>
+            <dd>University of Central Florida</dd>
           </div>
-          <span className="education-card__gpa">4.0 GPA</span>
-        </div>
+          <div className="about-education__row">
+            <dt>Program</dt>
+            <dd>Computer Science B.S.</dd>
+          </div>
+          <div className="about-education__row">
+            <dt>Timeline</dt>
+            <dd>Aug 2024 - Present</dd>
+          </div>
+          <div className="about-education__row about-education__row--score">
+            <dt>Academic score</dt>
+            <dd>4.0 GPA</dd>
+          </div>
+        </dl>
       </EdgeReveal>
 
-      <EdgeReveal className="skills-board" edge="right" order={1}>
-        <div className="skills-board__heading">
-          <span className="card-kicker">Technical loadout</span>
+      <EdgeReveal className="about-loadout" edge="right" order={1}>
+        <header className="about-loadout__heading">
+          <h2>Technical loadout</h2>
           <span>{skillGroups.reduce((count, group) => count + group.skills.length, 0)} tools</span>
-        </div>
-        {skillGroups.map((group) => (
-          <div className="skill-row" key={group.label}>
-            <span className="skill-row__label">{group.label}</span>
-            <div className="skill-row__chips">
-              {group.skills.map((skill) => (
-                <span className="skill-chip" key={skill}>
-                  {skill}
-                </span>
-              ))}
+        </header>
+        <div className="about-skill-list" role="list">
+          {skillGroups.map((group) => (
+            <div className="about-skill-row" key={group.label} role="listitem">
+              <h3>{group.label}</h3>
+              <div className="about-skill-row__chips" aria-label={`${group.label} skills`}>
+                {group.skills.map((skill) => (
+                  <span className="about-skill-chip" key={skill}>{skill}</span>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </EdgeReveal>
     </div>
   )
