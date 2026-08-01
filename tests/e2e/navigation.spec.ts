@@ -67,6 +67,50 @@ test('animates content, progress, and theme between sections', async ({
   )
 })
 
+test('hides checkpoint markers by default and restores them with the toggle', async ({
+  page,
+}) => {
+  await openSettled(page, 'hero')
+
+  const toggle = page.getByRole('switch', {
+    name: 'Show checkpoint markers',
+  })
+  await expect(toggle).not.toBeChecked()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(0)
+
+  await toggle.check()
+  await expect(toggle).toBeChecked()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(5)
+
+  await page.reload()
+  await expect(toggle).toBeChecked()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(5)
+
+  await toggle.uncheck()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(0)
+})
+
+test('exposes the animated bar as an accessible progress indicator', async ({
+  page,
+}) => {
+  await openSettled(page, 'about')
+
+  const progress = page.getByRole('progressbar', {
+    name: 'Portfolio progress',
+  })
+  await expect(progress).toHaveAttribute('aria-valuemin', '0')
+  await expect(progress).toHaveAttribute('aria-valuemax', '100')
+  await expect(progress).toHaveAttribute('aria-valuenow', '40')
+  await expect(progress).toHaveAttribute('aria-valuetext', '40.00%')
+  await expect(page.locator('.checkpoint-progress__percentage')).toHaveText(
+    '40.00%',
+  )
+  await expect(page.locator('.checkpoint-progress__meta')).toHaveCount(0)
+  await expect(page.locator('.checkpoint-progress')).not.toContainText(
+    'complete',
+  )
+})
+
 test('supports wheel and direct checkpoint navigation', async ({ page }) => {
   await openSettled(page, 'hero')
 
@@ -77,6 +121,7 @@ test('supports wheel and direct checkpoint navigation', async ({ page }) => {
     'false',
   )
 
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
   await page.getByRole('button', { name: 'projects checkpoint' }).click()
   await expect(page).toHaveURL(/#projects$/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -86,6 +131,7 @@ test('supports wheel and direct checkpoint navigation', async ({ page }) => {
 
 test('keeps checkpoint markers centered while hovering', async ({ page }) => {
   await openSettled(page, 'hero')
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
 
   const marker = page.getByRole('button', { name: 'about checkpoint' })
   const before = await marker.boundingBox()
@@ -131,6 +177,8 @@ test('keeps cube motion state separate from visible comments', async ({
   page,
 }) => {
   await openSettled(page, 'hero')
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
+  await page.evaluate(() => document.activeElement?.blur())
 
   await page.keyboard.press('ArrowRight')
   await expect(page).toHaveURL(/#about$/)

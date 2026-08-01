@@ -990,27 +990,30 @@ a,
   flex-direction: column;
 }
 
-.checkpoint-progress__meta {
+.checkpoint-progress__header {
   display: flex;
-  justify-content: space-between;
-  width: min(760px, calc(100vw - 4rem));
-  margin-bottom: 0.35rem;
-  color: rgb(255 255 255 / 52%);
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+  width: min(800px, calc(100vw - 2rem));
+  align-items: center;
+  gap: clamp(0.35rem, 1vw, 0.7rem);
 }
 
 .checkpoint-progress__track {
   position: relative;
   z-index: 0;
-  width: min(760px, calc(100vw - 4rem));
-  margin-top: calc(
-    var(--checkpoint-marker-height) + var(--checkpoint-marker-gap)
-  );
-  aspect-ratio: 840 / 48;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 840 / 64;
   pointer-events: auto;
+}
+
+.checkpoint-progress__percentage {
+  flex: none;
+  color: rgb(248 250 252 / 92%);
+  font-family: var(--heading-font);
+  font-size: clamp(0.82rem, 1.7vw, 1.35rem);
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0.12rem 0.15rem rgb(0 0 0 / 70%);
 }
 
 .checkpoint-progress__groove {
@@ -1084,6 +1087,78 @@ a,
   object-fit: contain;
   object-position: center;
   pointer-events: none;
+}
+
+.checkpoint-progress__toggle {
+  position: relative;
+  display: inline-flex;
+  min-height: 1.45rem;
+  margin-top: 0.3rem;
+  padding: 0.16rem 0.35rem;
+  border: 1px solid rgb(255 255 255 / 26%);
+  border-radius: 999px;
+  background: rgb(2 6 23 / 58%);
+  color: rgb(255 255 255 / 64%);
+  font-size: 0.54rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  align-items: center;
+  gap: 0.38rem;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkpoint-progress__toggle input {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkpoint-progress__toggle-track {
+  position: relative;
+  display: block;
+  width: 1.7rem;
+  height: 0.9rem;
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.checkpoint-progress__toggle-track::after {
+  position: absolute;
+  top: 0.11rem;
+  left: 0.12rem;
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 82%);
+  box-shadow: 0 0.08rem 0.18rem rgb(0 0 0 / 40%);
+  content: "";
+  transition: transform 0.2s ease;
+}
+
+.checkpoint-progress__toggle input:checked + .checkpoint-progress__toggle-track {
+  border-color: rgb(190 255 85 / 80%);
+  background: rgb(190 255 85 / 32%);
+}
+
+.checkpoint-progress__toggle input:checked + .checkpoint-progress__toggle-track::after {
+  background: rgb(190 255 85);
+  transform: translateX(0.78rem);
+}
+
+.checkpoint-progress__toggle:focus-within {
+  outline: 2px solid rgb(190 255 85);
+  outline-offset: 3px;
 }
 
 .cube-anchor,
@@ -1247,9 +1322,17 @@ a,
     top: max(0.55rem, env(safe-area-inset-top));
   }
 
-  .checkpoint-progress__meta,
-  .checkpoint-progress__track {
-    width: calc(100vw - 2rem);
+  .checkpoint-progress__header {
+    width: calc(100vw - 1rem);
+  }
+
+  .checkpoint-progress__percentage {
+    font-size: 0.76rem;
+  }
+
+  .checkpoint-progress__toggle {
+    margin-top: 0.24rem;
+    font-size: 0.46rem;
   }
 
   .checkpoint-progress__marker {
