@@ -1623,8 +1623,12 @@ a,
     margin-inline: -0.2rem;
     padding: 0.2rem 0.2rem 0.5rem;
     touch-action: pan-y;
-    scrollbar-color: rgb(190 255 85 / 70%) rgb(0 0 0 / 24%);
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .project-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .project-box-wrap {

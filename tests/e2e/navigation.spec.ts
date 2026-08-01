@@ -305,6 +305,25 @@ test('keeps project card copy readable on mobile widths', async ({ page }) => {
     (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length,
   )
   expect(columnCount).toBe(1)
+  const gridOverflow = await grid.evaluate((element) => {
+    const style = getComputedStyle(element)
+    const webkitScrollbar = getComputedStyle(element, '::-webkit-scrollbar')
+
+    return {
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      scrollbarWidth: style.scrollbarWidth,
+      webkitScrollbarDisplay: webkitScrollbar.display,
+    }
+  })
+  expect(gridOverflow.scrollHeight).toBeGreaterThan(gridOverflow.clientHeight)
+  expect(gridOverflow.scrollbarWidth).toBe('none')
+  expect(gridOverflow.webkitScrollbarDisplay).toBe('none')
+
+  await grid.evaluate((element) => {
+    element.scrollTop = element.scrollHeight
+  })
+  await expect(grid).toHaveJSProperty('scrollTop', gridOverflow.scrollHeight - gridOverflow.clientHeight)
   await expect(page.locator('.project-box')).toHaveCount(4)
   await expect(
     page.getByText(
