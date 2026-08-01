@@ -8,7 +8,8 @@
 - Motion-based content exits toward each layout cluster's closest edge.
 - Motion-based entrances from the same edge on initial loads and navigation.
 - Input locking during a transition so repeated events cannot skip screens.
-- Animated checkpoint fill, markers, section count, and completion percentage.
+- Animated checkpoint fill, default-hidden markers with a reversible accessible
+  toggle, and a numeric completion percentage beside the bar.
 - Blue, pink, green, red, and blue scene themes with synchronized background
   and ground crossfades.
 
