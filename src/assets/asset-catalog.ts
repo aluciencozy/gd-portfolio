@@ -16,6 +16,8 @@ import contactFrameTopAsset from './ui/contact/GJ_table_top_001.png'
 import contactBallAsset from './characters/ball.svg'
 import contactOrbAsset from './obstacles/yellow-orb.svg'
 import contactSpikeAsset from './obstacles/spike.svg'
+import projectFolderAsset from './ui/projects/folder.png'
+import projectLinkAsset from './ui/projects/link.png'
 
 export const characterAssets = {
   cube: cubeAsset,
@@ -51,4 +53,9 @@ export const contactAssets = {
   frameTop: contactFrameTopAsset,
   orb: contactOrbAsset,
   spike: contactSpikeAsset,
+} as const
+
+export const projectAssets = {
+  folder: projectFolderAsset,
+  link: projectLinkAsset,
 } as const

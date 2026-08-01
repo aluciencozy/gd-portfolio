@@ -6,7 +6,11 @@ import {
 } from 'motion/react'
 import type { FocusEvent, ReactElement, ReactNode } from 'react'
 import type { SceneId } from '../features/navigation/scene-navigator'
-import { contactAssets, heroAssets } from '../assets/asset-catalog'
+import {
+  contactAssets,
+  heroAssets,
+  projectAssets,
+} from '../assets/asset-catalog'
 import {
   experienceHighlights,
   projects,
@@ -341,7 +345,11 @@ function ProjectSection({
         <p>Hover or focus a project. The cube has opinions.</p>
       </EdgeReveal>
 
-      <div className="project-grid">
+      <div
+        aria-label="Selected projects"
+        className="project-grid"
+        data-scene-scroll-container="true"
+      >
         {projects.map((project, index) => {
           const edge = index % 2 === 0 ? 'left' : 'right'
 
@@ -353,6 +361,7 @@ function ProjectSection({
               order={index + 1}
             >
               <motion.article
+                aria-labelledby={`project-${index + 1}-title`}
                 className="project-box"
                 onBlur={clearCommentOnBlur}
                 onFocus={() => onCubeComment(project.reaction)}
@@ -366,17 +375,23 @@ function ProjectSection({
                 <div className="project-box__topline">
                   <div className="project-box__identity">
                     <span aria-hidden="true" className="project-box__icon">
-                      <span>{String(index + 1).padStart(2, '0')}</span>
+                      <img alt="" src={projectAssets.folder} />
+                      <span className="project-box__index">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
                     </span>
                     <span className="card-kicker">{project.label}</span>
                   </div>
-                  <span>{project.period}</span>
+                  <span className="project-box__period">{project.period}</span>
                 </div>
-                <h2>{project.name}</h2>
+                <h2 id={`project-${index + 1}-title`}>{project.name}</h2>
                 <strong>{project.summary}</strong>
                 <p>{project.detail}</p>
                 <div className="project-box__footer">
-                  <div className="project-box__stack">
+                  <div
+                    aria-label={`${project.name} technologies`}
+                    className="project-box__stack"
+                  >
                     {project.stack.map((technology) => (
                       <span key={technology}>{technology}</span>
                     ))}
@@ -388,7 +403,7 @@ function ProjectSection({
                       rel="noreferrer"
                       target="_blank"
                     >
-                      ↗
+                      <img alt="" aria-hidden="true" src={projectAssets.link} />
                     </a>
                   )}
                 </div>

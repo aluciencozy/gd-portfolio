@@ -173,6 +173,64 @@ test('lets project cards prompt a cube reaction', async ({ page }) => {
   )
 })
 
+test('renders projects as green keyboard-reachable cards with usable links', async ({
+  page,
+}) => {
+  await openSettled(page, 'projects')
+
+  const cards = page.locator('.project-box')
+  await expect(cards).toHaveCount(4)
+  await expect(cards.first()).toHaveCSS(
+    'border-top-color',
+    'rgb(248, 255, 239)',
+  )
+
+  for (const name of [
+    'Vesta Credentialing',
+    'Demonlist Ultimate',
+    'Guess the OST',
+    'Git Janitor',
+  ]) {
+    await expect(cards.filter({ hasText: name })).toHaveCount(1)
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    await cards.nth(index).focus()
+    await expect(cards.nth(index)).toBeFocused()
+  }
+
+  const projectLinks = page.getByRole('link', { name: /View .* on GitHub/ })
+  await expect(projectLinks).toHaveCount(2)
+  await expect(
+    page.getByRole('link', { name: 'View Demonlist Ultimate on GitHub' }),
+  ).toHaveAttribute('href', 'https://github.com/aluciencozy/demonlist')
+  await expect(
+    page.getByRole('link', { name: 'View Guess the OST on GitHub' }),
+  ).toHaveAttribute('href', 'https://github.com/aluciencozy/guess-the-ost')
+})
+
+test('keeps project card copy readable on mobile widths', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await openSettled(page, 'projects')
+
+  const grid = page.locator('.project-grid')
+  const columnCount = await grid.evaluate(
+    (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length,
+  )
+  expect(columnCount).toBe(1)
+  await expect(page.locator('.project-box')).toHaveCount(4)
+  await expect(
+    page.getByText(
+      'A scalable leaderboard for the hardest Geometry Dash levels.',
+    ),
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'A three-tier AWS platform with a Next.js frontend, Dockerized FastAPI services, PostgreSQL, S3 media, and a Gemini-powered assistant.',
+    ),
+  ).toBeVisible()
+})
+
 test('keeps cube motion state separate from visible comments', async ({
   page,
 }) => {
