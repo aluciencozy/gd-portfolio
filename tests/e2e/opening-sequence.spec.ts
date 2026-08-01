@@ -34,7 +34,7 @@ test('plays the opening sequence and settles into the hero layout', async ({
 
   await page.keyboard.press('End')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Let’s build something good.',
+    'CONTACT COMPLETE!',
     { timeout: 10_000 },
   )
 })

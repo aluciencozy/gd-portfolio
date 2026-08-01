@@ -155,7 +155,7 @@ test('keeps navigation bounded at the final section', async ({ page }) => {
 
   await expect(page).toHaveURL(/#contact$/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Let’s build something good.',
+    'CONTACT COMPLETE!',
   )
   await expect(page.locator('.cube-anchor')).toHaveAttribute(
     'data-cube-reaction',

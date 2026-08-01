@@ -1,5 +1,6 @@
 import {
   motion,
+  useReducedMotion,
   type TargetAndTransition,
   type Variants,
 } from 'motion/react'
@@ -401,54 +402,97 @@ function ProjectSection({
 }
 
 function ContactSection(): ReactElement {
-  return (
-    <div className="contact-layout">
-      <EdgeReveal className="contact-copy" edge="left">
-        <SectionHeading
-          eyebrow="Checkpoint 05 / Contact"
-          id="contact-heading"
-          title="Let’s build something good."
-        />
-        <p className="route-content__body">
-          I’m interested in thoughtful software, ambitious teams, and products
-          where engineering quality is part of the user experience.
-        </p>
-        <a className="contact-email" href="mailto:aluciencozy22@gmail.com">
-          aluciencozy22@gmail.com
-          <span aria-hidden="true">↗</span>
-        </a>
-      </EdgeReveal>
+  const reduceMotion = useReducedMotion() ?? false
 
-      <EdgeReveal className="contact-console" edge="right" order={1}>
-        <div className="contact-status">
-          <img alt="" aria-hidden="true" src={contactAssets.ball} />
-          <span>Open to software engineering opportunities</span>
-          <span className="contact-status__signal" aria-hidden="true" />
+  return (
+    <div className="contact-layout" data-scene-scroll-container="true">
+      <motion.div
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="contact-panel"
+        data-contact-motion={reduceMotion ? 'reduced' : 'spring'}
+        data-contact-panel
+        initial={
+          reduceMotion ? false : { opacity: 0, scale: 0.94, y: -140 }
+        }
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { type: 'spring', stiffness: 240, damping: 18, mass: 0.78 }
+        }
+      >
+        <div aria-hidden="true" className="contact-panel__frame">
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--top"
+            src={contactAssets.frameTop}
+          />
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--side contact-panel__frame-piece--side-left"
+            src={contactAssets.frameSide}
+          />
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--side contact-panel__frame-piece--side-right"
+            src={contactAssets.frameSide}
+          />
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--bottom"
+            src={contactAssets.frameBottom}
+          />
         </div>
 
-        <nav aria-label="Contact links" className="contact-links">
-          <a href="https://github.com/aluciencozy" rel="noreferrer" target="_blank">
-            <img alt="" aria-hidden="true" src={contactAssets.orb} />
-            <span><small>GitHub</small><strong>@aluciencozy</strong></span>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="https://linkedin.com/in/alcozy/" rel="noreferrer" target="_blank">
-            <img alt="" aria-hidden="true" src={contactAssets.orb} />
-            <span><small>LinkedIn</small><strong>/in/alcozy</strong></span>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="tel:+14077246962">
-            <img alt="" aria-hidden="true" src={contactAssets.spike} />
-            <span><small>Phone</small><strong>407 724 6962</strong></span>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a download href={resumeUrl}>
-            <img alt="" aria-hidden="true" src={contactAssets.ball} />
-            <span><small>Resume</small><strong>Download PDF</strong></span>
-            <span aria-hidden="true">↓</span>
-          </a>
-        </nav>
-      </EdgeReveal>
+        <div className="contact-panel__content">
+          <header className="contact-panel__heading">
+            <p className="contact-panel__eyebrow">CHECKPOINT 05 / CONTACT</p>
+            <h1 id="contact-heading">CONTACT COMPLETE!</h1>
+            <p className="contact-panel__subtitle">Let’s build something good.</p>
+          </header>
+
+          <div className="contact-panel__body">
+            <div className="contact-panel__intro">
+              <p className="contact-panel__availability">
+                <span aria-hidden="true" className="contact-panel__availability-dot" />
+                OPEN TO SOFTWARE ENGINEERING OPPORTUNITIES
+              </p>
+              <p className="contact-panel__copy">
+                I’m interested in thoughtful software, ambitious teams, and
+                products where engineering quality is part of the user
+                experience.
+              </p>
+              <a className="contact-email" href="mailto:aluciencozy22@gmail.com">
+                <span>aluciencozy22@gmail.com</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+
+            <nav aria-label="Contact links" className="contact-links">
+              <p className="contact-links__label">SELECT A CHANNEL</p>
+              <a href="https://github.com/aluciencozy" rel="noreferrer" target="_blank">
+                <img alt="" aria-hidden="true" src={contactAssets.orb} />
+                <span><small>GitHub</small><strong>@aluciencozy</strong></span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a href="https://linkedin.com/in/alcozy/" rel="noreferrer" target="_blank">
+                <img alt="" aria-hidden="true" src={contactAssets.orb} />
+                <span><small>LinkedIn</small><strong>/in/alcozy</strong></span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a href="tel:+14077246962">
+                <img alt="" aria-hidden="true" src={contactAssets.spike} />
+                <span><small>Phone</small><strong>407 724 6962</strong></span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a download href={resumeUrl}>
+                <img alt="" aria-hidden="true" src={contactAssets.ball} />
+                <span><small>Resume</small><strong>Download PDF</strong></span>
+                <span aria-hidden="true">↓</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }

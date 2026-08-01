@@ -1867,3 +1867,445 @@ a,
     font-size: 0.62rem;
   }
 }
+
+/* The Contact checkpoint uses the level-complete table pieces as a single,
+   stable panel instead of the usual edge-by-edge scene reveal. */
+.route-content--contact {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgb(150 255 45 / 70%) rgb(0 8 12 / 55%);
+}
+
+.route-content--contact .contact-layout {
+  display: flex;
+  width: min(100%, 78rem);
+  max-width: none;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.contact-panel {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: min(100%, 75rem);
+  flex: none;
+  padding: clamp(5rem, 10svh, 7.2rem) clamp(3rem, 7.5vw, 7rem)
+    clamp(4.8rem, 8svh, 6.5rem);
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 0.55rem;
+  background:
+    radial-gradient(circle at 50% 22%, rgb(34 83 56 / 15%), transparent 44%),
+    rgb(0 5 8 / 94%);
+  box-shadow:
+    0 1.5rem 3rem rgb(0 0 0 / 48%),
+    inset 0 0 0 0.4rem rgb(0 0 0 / 40%),
+    inset 0 0 3rem rgb(86 255 31 / 8%);
+}
+
+.contact-panel::before {
+  position: absolute;
+  z-index: 0;
+  inset: 1.25rem;
+  border: 1px solid rgb(191 255 71 / 22%);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 3%), transparent 30%),
+    rgb(0 0 0 / 52%);
+  box-shadow: inset 0 0 2.5rem rgb(0 0 0 / 60%);
+  content: "";
+  pointer-events: none;
+}
+
+.contact-panel__frame {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.contact-panel__frame-piece {
+  position: absolute;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+}
+
+.contact-panel__frame-piece--top,
+.contact-panel__frame-piece--bottom {
+  right: -0.35rem;
+  left: -0.35rem;
+  width: calc(100% + 0.7rem);
+  height: clamp(4.3rem, 7.3vw, 7.1rem);
+}
+
+.contact-panel__frame-piece--top {
+  top: -0.1rem;
+}
+
+.contact-panel__frame-piece--bottom {
+  bottom: -0.15rem;
+}
+
+.contact-panel__frame-piece--side {
+  top: 3.7rem;
+  bottom: 3.9rem;
+  width: clamp(2.4rem, 4.4vw, 4.2rem);
+  height: auto;
+}
+
+.contact-panel__frame-piece--side-left {
+  left: -0.2rem;
+}
+
+.contact-panel__frame-piece--side-right {
+  right: -0.2rem;
+  transform: scaleX(-1);
+}
+
+.contact-panel__content {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  min-width: 0;
+  gap: clamp(1.35rem, 3svh, 2.3rem);
+}
+
+.contact-panel__heading {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.contact-panel__eyebrow,
+.contact-links__label {
+  margin: 0;
+  color: rgb(94 255 235 / 88%);
+  font-size: clamp(0.54rem, 0.8vw, 0.7rem);
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.contact-panel__heading h1 {
+  max-width: 100%;
+  margin: 0.7rem 0 0;
+  color: rgb(191 255 56);
+  font-size: clamp(2rem, 4.6vw, 4.5rem);
+  line-height: 0.94;
+  text-shadow:
+    0 0.14rem 0 rgb(43 125 21),
+    0 0 1rem rgb(158 255 39 / 36%);
+}
+
+.contact-panel__subtitle {
+  margin: 0.75rem 0 0;
+  color: rgb(255 190 31);
+  font-size: clamp(0.84rem, 1.4vw, 1.15rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-shadow: 0 0.12rem 0 rgb(114 54 6);
+}
+
+.contact-panel__body {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(20rem, 1.08fr);
+  gap: clamp(1.35rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.contact-panel__intro {
+  min-width: 0;
+  padding: clamp(0.75rem, 1.4vw, 1.2rem) 0;
+}
+
+.contact-panel__availability {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  margin: 0;
+  color: rgb(190 255 85);
+  font-size: clamp(0.56rem, 0.78vw, 0.68rem);
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+}
+
+.contact-panel__availability-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  border-radius: 50%;
+  background: rgb(115 255 160);
+  box-shadow: 0 0 0.8rem rgb(115 255 160 / 85%);
+}
+
+.contact-panel__copy {
+  max-width: 31rem;
+  margin: 1rem 0 0;
+  color: rgb(255 255 255 / 76%);
+  font-size: clamp(0.72rem, 1vw, 0.86rem);
+  line-height: 1.6;
+}
+
+.contact-panel .contact-email {
+  display: inline-flex;
+  max-width: 100%;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: 0.5rem 0.1rem;
+  border-top: 1px solid rgb(255 190 31 / 46%);
+  border-bottom: 1px solid rgb(255 190 31 / 46%);
+  color: rgb(255 255 255 / 94%);
+  font-size: clamp(0.72rem, 1.1vw, 0.98rem);
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.contact-panel .contact-email span:first-child {
+  overflow-wrap: anywhere;
+}
+
+.contact-panel .contact-email span:last-child {
+  flex: none;
+  color: rgb(255 190 31);
+}
+
+.contact-panel .contact-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.contact-panel .contact-links__label {
+  grid-column: 1 / -1;
+  margin: 0 0 0.1rem;
+  color: rgb(255 255 255 / 58%);
+  font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+  letter-spacing: 0.14em;
+}
+
+.contact-panel .contact-links a {
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, 1fr) auto;
+  gap: 0.58rem;
+  align-items: center;
+  min-width: 0;
+  min-height: 3.65rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgb(168 255 55 / 42%);
+  border-radius: 0.2rem;
+  background: linear-gradient(135deg, rgb(155 255 46 / 14%), rgb(0 255 225 / 4%));
+  box-shadow: inset 0 -0.25rem 0 rgb(0 0 0 / 28%);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.contact-panel .contact-links a:hover,
+.contact-panel .contact-links a:focus-visible {
+  border-color: rgb(255 255 255 / 90%);
+  background: linear-gradient(135deg, rgb(190 255 85 / 25%), rgb(0 255 225 / 10%));
+  transform: translateY(-0.15rem);
+}
+
+.contact-panel .contact-links a > img {
+  width: 1.65rem;
+  height: 1.65rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.35rem rgb(177 255 47 / 42%));
+}
+
+.contact-panel .contact-links a:nth-of-type(3) > img {
+  width: 1.35rem;
+  justify-self: center;
+  filter: brightness(0) invert(1) drop-shadow(0 0 0.35rem rgb(177 255 47 / 42%));
+}
+
+.contact-panel .contact-links a > span:nth-child(2) {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.contact-panel .contact-links small {
+  color: rgb(255 255 255 / 59%);
+  font-size: clamp(0.48rem, 0.65vw, 0.57rem);
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.contact-panel .contact-links strong {
+  overflow-wrap: anywhere;
+  color: rgb(255 255 255 / 94%);
+  font-size: clamp(0.61rem, 0.85vw, 0.75rem);
+  line-height: 1.25;
+}
+
+.contact-panel .contact-links a > span:last-child {
+  color: rgb(191 255 56);
+  font-size: 1rem;
+}
+
+.contact-panel a:focus-visible {
+  outline: 3px solid rgb(255 255 255 / 96%);
+  outline-offset: 4px;
+}
+
+@media (max-width: 880px) {
+  .route-content--contact .contact-layout {
+    width: 100%;
+  }
+
+  .contact-panel {
+    width: 100%;
+    padding-right: clamp(2.3rem, 7vw, 4rem);
+    padding-left: clamp(2.3rem, 7vw, 4rem);
+  }
+
+  .contact-panel__body {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .contact-panel__intro {
+    padding: 0;
+  }
+
+  .contact-panel .contact-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .route-content--contact {
+    align-items: flex-start;
+    padding: clamp(4.8rem, 10svh, 5.8rem) 0.55rem
+      calc(var(--scene-ground-height) + 1rem);
+  }
+
+  .route-content--contact .contact-layout {
+    min-height: 100%;
+    align-items: center;
+  }
+
+  .contact-panel {
+    padding: 3.7rem 1.7rem 3.55rem;
+    border-radius: 0.38rem;
+  }
+
+  .contact-panel::before {
+    inset: 0.9rem;
+  }
+
+  .contact-panel__frame-piece--top,
+  .contact-panel__frame-piece--bottom {
+    height: 4.2rem;
+  }
+
+  .contact-panel__frame-piece--side {
+    top: 3.2rem;
+    bottom: 3.3rem;
+    width: 2.15rem;
+  }
+
+  .contact-panel__content {
+    gap: 1.05rem;
+  }
+
+  .contact-panel__eyebrow,
+  .contact-links__label {
+    font-size: 0.48rem;
+    letter-spacing: 0.13em;
+  }
+
+  .contact-panel__heading h1 {
+    margin-top: 0.5rem;
+    font-size: clamp(1.45rem, 7.3vw, 2.2rem);
+    letter-spacing: 0;
+  }
+
+  .contact-panel__subtitle {
+    margin-top: 0.48rem;
+    font-size: 0.67rem;
+  }
+
+  .contact-panel__body {
+    gap: 0.95rem;
+  }
+
+  .contact-panel__availability {
+    gap: 0.4rem;
+    font-size: 0.49rem;
+    letter-spacing: 0.04em;
+  }
+
+  .contact-panel__availability-dot {
+    width: 0.42rem;
+    height: 0.42rem;
+  }
+
+  .contact-panel__copy {
+    margin-top: 0.55rem;
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
+
+  .contact-panel .contact-email {
+    gap: 0.45rem;
+    margin-top: 0.7rem;
+    padding: 0.35rem 0;
+    font-size: 0.63rem;
+  }
+
+  .contact-panel .contact-links {
+    grid-template-columns: 1fr;
+    gap: 0.38rem;
+  }
+
+  .contact-panel .contact-links__label {
+    margin-bottom: 0.05rem;
+  }
+
+  .contact-panel .contact-links a {
+    grid-template-columns: 1.55rem minmax(0, 1fr) auto;
+    min-height: 2.65rem;
+    gap: 0.5rem;
+    padding: 0.38rem 0.48rem;
+  }
+
+  .contact-panel .contact-links a > img {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .contact-panel .contact-links a:nth-of-type(3) > img {
+    width: 1rem;
+  }
+
+  .contact-panel .contact-links small {
+    font-size: 0.43rem;
+  }
+
+  .contact-panel .contact-links strong {
+    font-size: 0.57rem;
+  }
+
+  .contact-panel .contact-links a > span:last-child {
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-panel .contact-links a {
+    transition-duration: 0.01ms;
+  }
+}
