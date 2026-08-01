@@ -177,6 +177,7 @@ test('keeps the cube grounded and its asset size stable across reactions', async
   expect(afterNavigation.anchorBottom).toBeCloseTo(afterNavigation.groundTop, 1)
   expect(afterNavigation.width).toBeCloseTo(initial.width, 2)
 
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
   await page.getByRole('button', { name: 'contact checkpoint' }).click()
   await expect(page.locator('.app-shell')).toHaveAttribute(
     'data-transitioning',
