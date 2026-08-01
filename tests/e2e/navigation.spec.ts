@@ -154,6 +154,9 @@ test('exposes the animated bar as an accessible progress indicator', async ({
   await expect(page.locator('.checkpoint-progress__percentage')).toHaveText(
     '40.00%',
   )
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
+  await expect(progress.locator('[data-checkpoint-marker]')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'hero checkpoint' })).toBeVisible()
   await expect(page.locator('.checkpoint-progress__meta')).toHaveCount(0)
   await expect(page.locator('.checkpoint-progress')).not.toContainText(
     'complete',

@@ -1059,13 +1059,19 @@ a,
   gap: clamp(0.35rem, 1vw, 0.7rem);
 }
 
-.checkpoint-progress__track {
+.checkpoint-progress__bar {
   position: relative;
-  z-index: 0;
   width: 100%;
   min-width: 0;
   aspect-ratio: 840 / 64;
-  pointer-events: auto;
+  pointer-events: none;
+}
+
+.checkpoint-progress__track {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
 }
 
 .checkpoint-progress__percentage {
@@ -1867,7 +1873,12 @@ a,
 .route-content--contact {
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: rgb(150 255 45 / 70%) rgb(0 8 12 / 55%);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.route-content--contact::-webkit-scrollbar {
+  display: none;
 }
 
 .route-content--contact .contact-layout {

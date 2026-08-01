@@ -68,37 +68,39 @@ export function CheckpointProgress({
       {...rest}
     >
       <div className="checkpoint-progress__header">
-        <div
-          aria-label="Portfolio progress"
-          aria-valuemax={100}
-          aria-valuemin={0}
-          aria-valuenow={percentage}
-          aria-valuetext={percentageLabel}
-          className="checkpoint-progress__track"
-          data-progress-value={percentage}
-          role="progressbar"
-        >
-          <div className="checkpoint-progress__fill-clip">
-            <motion.div
-              animate={{
-                clipPath: `inset(0 ${100 - destinationProgress * 100}% 0 0)`,
-              }}
+        <div className="checkpoint-progress__bar">
+          <div
+            aria-label="Portfolio progress"
+            aria-valuemax={100}
+            aria-valuemin={0}
+            aria-valuenow={percentage}
+            aria-valuetext={percentageLabel}
+            className="checkpoint-progress__track"
+            data-progress-value={percentage}
+            role="progressbar"
+          >
+            <div className="checkpoint-progress__fill-clip">
+              <motion.div
+                animate={{
+                  clipPath: `inset(0 ${100 - destinationProgress * 100}% 0 0)`,
+                }}
+                aria-hidden="true"
+                className="checkpoint-progress__fill"
+                initial={false}
+                style={{
+                  backgroundImage: `url(${progressAssets.fill})`,
+                }}
+                transition={{ duration: 0.72, ease: EASE_OUT }}
+              />
+            </div>
+
+            <img
+              alt=""
               aria-hidden="true"
-              className="checkpoint-progress__fill"
-              initial={false}
-              style={{
-                backgroundImage: `url(${progressAssets.fill})`,
-              }}
-              transition={{ duration: 0.72, ease: EASE_OUT }}
+              className="checkpoint-progress__groove"
+              src={progressAssets.groove}
             />
           </div>
-
-          <img
-            alt=""
-            aria-hidden="true"
-            className="checkpoint-progress__groove"
-            src={progressAssets.groove}
-          />
 
           {showMarkers &&
             SCENE_IDS.map((scene) => {

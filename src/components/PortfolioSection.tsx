@@ -420,7 +420,7 @@ function ContactSection(): ReactElement {
   const reduceMotion = useReducedMotion() ?? false
 
   return (
-    <div className="contact-layout" data-scene-scroll-container="true">
+    <div className="contact-layout">
       <motion.div
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="contact-panel"
@@ -523,6 +523,7 @@ export function PortfolioSection({
       aria-hidden={ariaHidden}
       aria-labelledby={`${id}-heading`}
       className={`route-content route-content--${id}`}
+      data-scene-scroll-container={id === 'contact' ? 'true' : undefined}
       data-scene={id}
       id={id}
       tabIndex={-1}
