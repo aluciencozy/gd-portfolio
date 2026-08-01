@@ -22,7 +22,7 @@ async function readCubeTransform(page: Page): Promise<{
   scaleY: number
   x: number
 }> {
-  return page.locator('.cube-anchor').evaluate((element) => {
+  return page.locator('.cube-anchor__motion').evaluate((element) => {
     const transform = getComputedStyle(element).transform
     const matrix = new DOMMatrix(transform === 'none' ? undefined : transform)
 
@@ -33,6 +33,55 @@ async function readCubeTransform(page: Page): Promise<{
       x: matrix.e,
     }
   })
+}
+
+interface CubeGrounding {
+  anchorBottom: number
+  groundTop: number
+  imageBottom: number
+  width: number
+}
+
+async function readCubeGrounding(page: Page): Promise<CubeGrounding> {
+  return page.evaluate(() => {
+    const anchor = document.querySelector('.cube-anchor')
+    const image = document.querySelector('.cube-anchor__image')
+    const motion = document.querySelector('.cube-anchor__motion')
+    const ground = document.querySelector('.scene-ground__horizon')
+
+    if (!anchor || !image || !motion || !ground) {
+      throw new Error('Cube grounding elements are missing')
+    }
+
+    return {
+      anchorBottom: anchor.getBoundingClientRect().bottom,
+      groundTop: ground.getBoundingClientRect().top,
+      imageBottom: image.getBoundingClientRect().bottom,
+      width: Number.parseFloat(getComputedStyle(motion).width),
+    }
+  })
+}
+
+async function sampleCubeGrounding(
+  page: Page,
+  duration = 900,
+): Promise<CubeGrounding[]> {
+  const samples: CubeGrounding[] = []
+  const end = Date.now() + duration
+
+  while (Date.now() < end) {
+    samples.push(await readCubeGrounding(page))
+    await page.waitForTimeout(40)
+  }
+
+  return samples
+}
+
+function expectCubeGrounded(samples: CubeGrounding[]): void {
+  for (const sample of samples) {
+    expect(sample.imageBottom).toBeLessThanOrEqual(sample.groundTop + 1)
+    expect(sample.anchorBottom).toBeLessThanOrEqual(sample.groundTop + 1)
+  }
 }
 
 test('animates content, progress, and theme between sections', async ({
@@ -109,6 +158,40 @@ test('exposes the animated bar as an accessible progress indicator', async ({
   await expect(page.locator('.checkpoint-progress')).not.toContainText(
     'complete',
   )
+})
+
+test('keeps the cube grounded and its asset size stable across reactions', async ({
+  page,
+}) => {
+  await openSettled(page, 'hero')
+
+  const initialSamples = await sampleCubeGrounding(page, 480)
+  expectCubeGrounded(initialSamples)
+  const initial = initialSamples.at(-1)!
+  expect(initial.anchorBottom).toBeCloseTo(initial.groundTop, 1)
+
+  await page.keyboard.press('ArrowRight')
+  const navigationSamples = await sampleCubeGrounding(page)
+  expectCubeGrounded(navigationSamples)
+  const afterNavigation = navigationSamples.at(-1)!
+  expect(afterNavigation.anchorBottom).toBeCloseTo(afterNavigation.groundTop, 1)
+  expect(afterNavigation.width).toBeCloseTo(initial.width, 2)
+
+  await page.getByRole('button', { name: 'contact checkpoint' }).click()
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-transitioning',
+    'false',
+  )
+  const contact = await readCubeGrounding(page)
+  expect(contact.anchorBottom).toBeCloseTo(contact.groundTop, 1)
+  expect(contact.width).toBeCloseTo(initial.width, 2)
+
+  await page.keyboard.press('ArrowRight')
+  const boundarySamples = await sampleCubeGrounding(page)
+  expectCubeGrounded(boundarySamples)
+  const afterBoundary = boundarySamples.at(-1)!
+  expect(afterBoundary.anchorBottom).toBeCloseTo(afterBoundary.groundTop, 1)
+  expect(afterBoundary.width).toBeCloseTo(initial.width, 2)
 })
 
 test('supports wheel and direct checkpoint navigation', async ({ page }) => {
@@ -284,7 +367,7 @@ test('keeps cube motion state separate from visible comments', async ({
   await expect(page.locator('.route-stage')).toHaveCSS('z-index', '10')
   const resolvedPositions = await page.evaluate(() => {
     const cube = new DOMMatrix(
-      getComputedStyle(document.querySelector('.cube-anchor')!).transform,
+      getComputedStyle(document.querySelector('.cube-anchor__motion')!).transform,
     )
     const commentAnchor = new DOMMatrix(
       getComputedStyle(
