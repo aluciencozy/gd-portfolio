@@ -22,7 +22,7 @@ async function readCubeTransform(page: Page): Promise<{
   scaleY: number
   x: number
 }> {
-  return page.locator('.cube-anchor').evaluate((element) => {
+  return page.locator('.cube-anchor__motion').evaluate((element) => {
     const transform = getComputedStyle(element).transform
     const matrix = new DOMMatrix(transform === 'none' ? undefined : transform)
 
@@ -33,6 +33,55 @@ async function readCubeTransform(page: Page): Promise<{
       x: matrix.e,
     }
   })
+}
+
+interface CubeGrounding {
+  anchorBottom: number
+  groundTop: number
+  imageBottom: number
+  width: number
+}
+
+async function readCubeGrounding(page: Page): Promise<CubeGrounding> {
+  return page.evaluate(() => {
+    const anchor = document.querySelector('.cube-anchor')
+    const image = document.querySelector('.cube-anchor__image')
+    const motion = document.querySelector('.cube-anchor__motion')
+    const ground = document.querySelector('.scene-ground__horizon')
+
+    if (!anchor || !image || !motion || !ground) {
+      throw new Error('Cube grounding elements are missing')
+    }
+
+    return {
+      anchorBottom: anchor.getBoundingClientRect().bottom,
+      groundTop: ground.getBoundingClientRect().top,
+      imageBottom: image.getBoundingClientRect().bottom,
+      width: Number.parseFloat(getComputedStyle(motion).width),
+    }
+  })
+}
+
+async function sampleCubeGrounding(
+  page: Page,
+  duration = 900,
+): Promise<CubeGrounding[]> {
+  const samples: CubeGrounding[] = []
+  const end = Date.now() + duration
+
+  while (Date.now() < end) {
+    samples.push(await readCubeGrounding(page))
+    await page.waitForTimeout(40)
+  }
+
+  return samples
+}
+
+function expectCubeGrounded(samples: CubeGrounding[]): void {
+  for (const sample of samples) {
+    expect(sample.imageBottom).toBeLessThanOrEqual(sample.groundTop + 1)
+    expect(sample.anchorBottom).toBeLessThanOrEqual(sample.groundTop + 1)
+  }
 }
 
 test('animates content, progress, and theme between sections', async ({
@@ -67,6 +116,88 @@ test('animates content, progress, and theme between sections', async ({
   )
 })
 
+test('hides checkpoint markers by default and restores them with the toggle', async ({
+  page,
+}) => {
+  await openSettled(page, 'hero')
+
+  const toggle = page.getByRole('switch', {
+    name: 'Show checkpoint markers',
+  })
+  await expect(toggle).not.toBeChecked()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(0)
+
+  await toggle.check()
+  await expect(toggle).toBeChecked()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(5)
+
+  await page.reload()
+  await expect(toggle).toBeChecked()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(5)
+
+  await toggle.uncheck()
+  await expect(page.locator('[data-checkpoint-marker]')).toHaveCount(0)
+})
+
+test('exposes the animated bar as an accessible progress indicator', async ({
+  page,
+}) => {
+  await openSettled(page, 'about')
+
+  const progress = page.getByRole('progressbar', {
+    name: 'Portfolio progress',
+  })
+  await expect(progress).toHaveAttribute('aria-valuemin', '0')
+  await expect(progress).toHaveAttribute('aria-valuemax', '100')
+  await expect(progress).toHaveAttribute('aria-valuenow', '40')
+  await expect(progress).toHaveAttribute('aria-valuetext', '40.00%')
+  await expect(page.locator('.checkpoint-progress__percentage')).toHaveText(
+    '40.00%',
+  )
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
+  await expect(progress.locator('[data-checkpoint-marker]')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'hero checkpoint' })).toBeVisible()
+  await expect(page.locator('.checkpoint-progress__meta')).toHaveCount(0)
+  await expect(page.locator('.checkpoint-progress')).not.toContainText(
+    'complete',
+  )
+})
+
+test('keeps the cube grounded and its asset size stable across reactions', async ({
+  page,
+}) => {
+  await openSettled(page, 'hero')
+
+  const initialSamples = await sampleCubeGrounding(page, 480)
+  expectCubeGrounded(initialSamples)
+  const initial = initialSamples.at(-1)!
+  expect(initial.anchorBottom).toBeCloseTo(initial.groundTop, 1)
+
+  await page.keyboard.press('ArrowRight')
+  const navigationSamples = await sampleCubeGrounding(page)
+  expectCubeGrounded(navigationSamples)
+  const afterNavigation = navigationSamples.at(-1)!
+  expect(afterNavigation.anchorBottom).toBeCloseTo(afterNavigation.groundTop, 1)
+  expect(afterNavigation.width).toBeCloseTo(initial.width, 2)
+
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
+  await page.getByRole('button', { name: 'contact checkpoint' }).click()
+  await expect(page.locator('.app-shell')).toHaveAttribute(
+    'data-transitioning',
+    'false',
+  )
+  const contact = await readCubeGrounding(page)
+  expect(contact.anchorBottom).toBeCloseTo(contact.groundTop, 1)
+  expect(contact.width).toBeCloseTo(initial.width, 2)
+
+  await page.keyboard.press('ArrowRight')
+  const boundarySamples = await sampleCubeGrounding(page)
+  expectCubeGrounded(boundarySamples)
+  const afterBoundary = boundarySamples.at(-1)!
+  expect(afterBoundary.anchorBottom).toBeCloseTo(afterBoundary.groundTop, 1)
+  expect(afterBoundary.width).toBeCloseTo(initial.width, 2)
+})
+
 test('supports wheel and direct checkpoint navigation', async ({ page }) => {
   await openSettled(page, 'hero')
 
@@ -77,6 +208,7 @@ test('supports wheel and direct checkpoint navigation', async ({ page }) => {
     'false',
   )
 
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
   await page.getByRole('button', { name: 'projects checkpoint' }).click()
   await expect(page).toHaveURL(/#projects$/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -86,6 +218,7 @@ test('supports wheel and direct checkpoint navigation', async ({ page }) => {
 
 test('keeps checkpoint markers centered while hovering', async ({ page }) => {
   await openSettled(page, 'hero')
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
 
   const marker = page.getByRole('button', { name: 'about checkpoint' })
   const before = await marker.boundingBox()
@@ -109,7 +242,7 @@ test('keeps navigation bounded at the final section', async ({ page }) => {
 
   await expect(page).toHaveURL(/#contact$/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Let’s build something good.',
+    'CONTACT COMPLETE!',
   )
   await expect(page.locator('.cube-anchor')).toHaveAttribute(
     'data-cube-reaction',
@@ -127,10 +260,89 @@ test('lets project cards prompt a cube reaction', async ({ page }) => {
   )
 })
 
+test('renders projects as green keyboard-reachable cards with usable links', async ({
+  page,
+}) => {
+  await openSettled(page, 'projects')
+
+  const cards = page.locator('.project-box')
+  await expect(cards).toHaveCount(4)
+  await expect(cards.first()).toHaveCSS(
+    'border-top-color',
+    'rgb(248, 255, 239)',
+  )
+
+  for (const name of [
+    'Vesta Credentialing',
+    'Demonlist Ultimate',
+    'Guess the OST',
+    'Git Janitor',
+  ]) {
+    await expect(cards.filter({ hasText: name })).toHaveCount(1)
+  }
+
+  for (let index = 0; index < 4; index += 1) {
+    await cards.nth(index).focus()
+    await expect(cards.nth(index)).toBeFocused()
+  }
+
+  const projectLinks = page.getByRole('link', { name: /View .* on GitHub/ })
+  await expect(projectLinks).toHaveCount(2)
+  await expect(
+    page.getByRole('link', { name: 'View Demonlist Ultimate on GitHub' }),
+  ).toHaveAttribute('href', 'https://github.com/aluciencozy/demonlist')
+  await expect(
+    page.getByRole('link', { name: 'View Guess the OST on GitHub' }),
+  ).toHaveAttribute('href', 'https://github.com/aluciencozy/guess-the-ost')
+})
+
+test('keeps project card copy readable on mobile widths', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await openSettled(page, 'projects')
+
+  const grid = page.locator('.project-grid')
+  const columnCount = await grid.evaluate(
+    (element) => getComputedStyle(element).gridTemplateColumns.split(' ').length,
+  )
+  expect(columnCount).toBe(1)
+  const gridOverflow = await grid.evaluate((element) => {
+    const style = getComputedStyle(element)
+    const webkitScrollbar = getComputedStyle(element, '::-webkit-scrollbar')
+
+    return {
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      scrollbarWidth: style.scrollbarWidth,
+      webkitScrollbarDisplay: webkitScrollbar.display,
+    }
+  })
+  expect(gridOverflow.scrollHeight).toBeGreaterThan(gridOverflow.clientHeight)
+  expect(gridOverflow.scrollbarWidth).toBe('none')
+  expect(gridOverflow.webkitScrollbarDisplay).toBe('none')
+
+  await grid.evaluate((element) => {
+    element.scrollTop = element.scrollHeight
+  })
+  await expect(grid).toHaveJSProperty('scrollTop', gridOverflow.scrollHeight - gridOverflow.clientHeight)
+  await expect(page.locator('.project-box')).toHaveCount(4)
+  await expect(
+    page.getByText(
+      'A scalable leaderboard for the hardest Geometry Dash levels.',
+    ),
+  ).toBeVisible()
+  await expect(
+    page.getByText(
+      'A three-tier AWS platform with a Next.js frontend, Dockerized FastAPI services, PostgreSQL, S3 media, and a Gemini-powered assistant.',
+    ),
+  ).toBeVisible()
+})
+
 test('keeps cube motion state separate from visible comments', async ({
   page,
 }) => {
   await openSettled(page, 'hero')
+  await page.getByRole('switch', { name: 'Show checkpoint markers' }).check()
+  await page.evaluate(() => document.activeElement?.blur())
 
   await page.keyboard.press('ArrowRight')
   await expect(page).toHaveURL(/#about$/)
@@ -178,7 +390,7 @@ test('keeps cube motion state separate from visible comments', async ({
   await expect(page.locator('.route-stage')).toHaveCSS('z-index', '10')
   const resolvedPositions = await page.evaluate(() => {
     const cube = new DOMMatrix(
-      getComputedStyle(document.querySelector('.cube-anchor')!).transform,
+      getComputedStyle(document.querySelector('.cube-anchor__motion')!).transform,
     )
     const commentAnchor = new DOMMatrix(
       getComputedStyle(

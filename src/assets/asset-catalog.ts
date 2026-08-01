@@ -10,9 +10,14 @@ import nameAsset from './ui/hero/gd-name-two-lines-left-aligned.png'
 import resumeButtonAsset from './ui/hero/GJ_longBtn03_001.png'
 import workButtonAsset from './ui/hero/GJ_longBtn02_001.png'
 import workIconAsset from './ui/hero/GJ_playBtn_001.png'
+import contactFrameBottomAsset from './ui/contact/GJ_table_bottom_001.png'
+import contactFrameSideAsset from './ui/contact/GJ_table_side_001.png'
+import contactFrameTopAsset from './ui/contact/GJ_table_top_001.png'
 import contactBallAsset from './characters/ball.svg'
 import contactOrbAsset from './obstacles/yellow-orb.svg'
 import contactSpikeAsset from './obstacles/spike.svg'
+import projectFolderAsset from './ui/projects/folder.png'
+import projectLinkAsset from './ui/projects/link.png'
 
 export const characterAssets = {
   cube: cubeAsset,
@@ -43,6 +48,14 @@ export const heroAssets = {
 
 export const contactAssets = {
   ball: contactBallAsset,
+  frameBottom: contactFrameBottomAsset,
+  frameSide: contactFrameSideAsset,
+  frameTop: contactFrameTopAsset,
   orb: contactOrbAsset,
   spike: contactSpikeAsset,
+} as const
+
+export const projectAssets = {
+  folder: projectFolderAsset,
+  link: projectLinkAsset,
 } as const

@@ -1,11 +1,16 @@
 import {
   motion,
+  useReducedMotion,
   type TargetAndTransition,
   type Variants,
 } from 'motion/react'
 import type { FocusEvent, ReactElement, ReactNode } from 'react'
 import type { SceneId } from '../features/navigation/scene-navigator'
-import { contactAssets, heroAssets } from '../assets/asset-catalog'
+import {
+  contactAssets,
+  heroAssets,
+  projectAssets,
+} from '../assets/asset-catalog'
 import {
   experienceHighlights,
   projects,
@@ -340,7 +345,11 @@ function ProjectSection({
         <p>Hover or focus a project. The cube has opinions.</p>
       </EdgeReveal>
 
-      <div className="project-grid">
+      <div
+        aria-label="Selected projects"
+        className="project-grid"
+        data-scene-scroll-container="true"
+      >
         {projects.map((project, index) => {
           const edge = index % 2 === 0 ? 'left' : 'right'
 
@@ -352,6 +361,7 @@ function ProjectSection({
               order={index + 1}
             >
               <motion.article
+                aria-labelledby={`project-${index + 1}-title`}
                 className="project-box"
                 onBlur={clearCommentOnBlur}
                 onFocus={() => onCubeComment(project.reaction)}
@@ -365,17 +375,23 @@ function ProjectSection({
                 <div className="project-box__topline">
                   <div className="project-box__identity">
                     <span aria-hidden="true" className="project-box__icon">
-                      <span>{String(index + 1).padStart(2, '0')}</span>
+                      <img alt="" src={projectAssets.folder} />
+                      <span className="project-box__index">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
                     </span>
                     <span className="card-kicker">{project.label}</span>
                   </div>
-                  <span>{project.period}</span>
+                  <span className="project-box__period">{project.period}</span>
                 </div>
-                <h2>{project.name}</h2>
+                <h2 id={`project-${index + 1}-title`}>{project.name}</h2>
                 <strong>{project.summary}</strong>
                 <p>{project.detail}</p>
                 <div className="project-box__footer">
-                  <div className="project-box__stack">
+                  <div
+                    aria-label={`${project.name} technologies`}
+                    className="project-box__stack"
+                  >
                     {project.stack.map((technology) => (
                       <span key={technology}>{technology}</span>
                     ))}
@@ -387,7 +403,7 @@ function ProjectSection({
                       rel="noreferrer"
                       target="_blank"
                     >
-                      ↗
+                      <img alt="" aria-hidden="true" src={projectAssets.link} />
                     </a>
                   )}
                 </div>
@@ -401,54 +417,97 @@ function ProjectSection({
 }
 
 function ContactSection(): ReactElement {
+  const reduceMotion = useReducedMotion() ?? false
+
   return (
     <div className="contact-layout">
-      <EdgeReveal className="contact-copy" edge="left">
-        <SectionHeading
-          eyebrow="Checkpoint 05 / Contact"
-          id="contact-heading"
-          title="Let’s build something good."
-        />
-        <p className="route-content__body">
-          I’m interested in thoughtful software, ambitious teams, and products
-          where engineering quality is part of the user experience.
-        </p>
-        <a className="contact-email" href="mailto:aluciencozy22@gmail.com">
-          aluciencozy22@gmail.com
-          <span aria-hidden="true">↗</span>
-        </a>
-      </EdgeReveal>
-
-      <EdgeReveal className="contact-console" edge="right" order={1}>
-        <div className="contact-status">
-          <img alt="" aria-hidden="true" src={contactAssets.ball} />
-          <span>Open to software engineering opportunities</span>
-          <span className="contact-status__signal" aria-hidden="true" />
+      <motion.div
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="contact-panel"
+        data-contact-motion={reduceMotion ? 'reduced' : 'spring'}
+        data-contact-panel
+        initial={
+          reduceMotion ? false : { opacity: 0, scale: 0.94, y: -140 }
+        }
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { type: 'spring', stiffness: 240, damping: 18, mass: 0.78 }
+        }
+      >
+        <div aria-hidden="true" className="contact-panel__frame">
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--top"
+            src={contactAssets.frameTop}
+          />
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--side contact-panel__frame-piece--side-left"
+            src={contactAssets.frameSide}
+          />
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--side contact-panel__frame-piece--side-right"
+            src={contactAssets.frameSide}
+          />
+          <img
+            alt=""
+            className="contact-panel__frame-piece contact-panel__frame-piece--bottom"
+            src={contactAssets.frameBottom}
+          />
         </div>
 
-        <nav aria-label="Contact links" className="contact-links">
-          <a href="https://github.com/aluciencozy" rel="noreferrer" target="_blank">
-            <img alt="" aria-hidden="true" src={contactAssets.orb} />
-            <span><small>GitHub</small><strong>@aluciencozy</strong></span>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="https://linkedin.com/in/alcozy/" rel="noreferrer" target="_blank">
-            <img alt="" aria-hidden="true" src={contactAssets.orb} />
-            <span><small>LinkedIn</small><strong>/in/alcozy</strong></span>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="tel:+14077246962">
-            <img alt="" aria-hidden="true" src={contactAssets.spike} />
-            <span><small>Phone</small><strong>407 724 6962</strong></span>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a download href={resumeUrl}>
-            <img alt="" aria-hidden="true" src={contactAssets.ball} />
-            <span><small>Resume</small><strong>Download PDF</strong></span>
-            <span aria-hidden="true">↓</span>
-          </a>
-        </nav>
-      </EdgeReveal>
+        <div className="contact-panel__content">
+          <header className="contact-panel__heading">
+            <p className="contact-panel__eyebrow">CHECKPOINT 05 / CONTACT</p>
+            <h1 id="contact-heading">CONTACT COMPLETE!</h1>
+            <p className="contact-panel__subtitle">Let’s build something good.</p>
+          </header>
+
+          <div className="contact-panel__body">
+            <div className="contact-panel__intro">
+              <p className="contact-panel__availability">
+                <span aria-hidden="true" className="contact-panel__availability-dot" />
+                OPEN TO SOFTWARE ENGINEERING OPPORTUNITIES
+              </p>
+              <p className="contact-panel__copy">
+                I’m interested in thoughtful software, ambitious teams, and
+                products where engineering quality is part of the user
+                experience.
+              </p>
+              <a className="contact-email" href="mailto:aluciencozy22@gmail.com">
+                <span>aluciencozy22@gmail.com</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+
+            <nav aria-label="Contact links" className="contact-links">
+              <p className="contact-links__label">SELECT A CHANNEL</p>
+              <a href="https://github.com/aluciencozy" rel="noreferrer" target="_blank">
+                <img alt="" aria-hidden="true" src={contactAssets.orb} />
+                <span><small>GitHub</small><strong>@aluciencozy</strong></span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a href="https://linkedin.com/in/alcozy/" rel="noreferrer" target="_blank">
+                <img alt="" aria-hidden="true" src={contactAssets.orb} />
+                <span><small>LinkedIn</small><strong>/in/alcozy</strong></span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a href="tel:+14077246962">
+                <img alt="" aria-hidden="true" src={contactAssets.spike} />
+                <span><small>Phone</small><strong>407 724 6962</strong></span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a download href={resumeUrl}>
+                <img alt="" aria-hidden="true" src={contactAssets.ball} />
+                <span><small>Resume</small><strong>Download PDF</strong></span>
+                <span aria-hidden="true">↓</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }
@@ -464,6 +523,7 @@ export function PortfolioSection({
       aria-hidden={ariaHidden}
       aria-labelledby={`${id}-heading`}
       className={`route-content route-content--${id}`}
+      data-scene-scroll-container={id === 'contact' ? 'true' : undefined}
       data-scene={id}
       id={id}
       tabIndex={-1}

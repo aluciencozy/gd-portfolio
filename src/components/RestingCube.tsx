@@ -29,6 +29,24 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const
 const EASE_IN_OUT = [0.42, 0, 0.58, 1] as const
 const CUBE_JUMP_DISTANCE = 44
 
+function groundOffsetForRotation(
+  rotation: number,
+  width: number,
+  height: number,
+  scaleX = 1,
+  scaleY = 1,
+): number {
+  const radians = (rotation * Math.PI) / 180
+  const halfWidth = (width * scaleX) / 2
+  const scaledHeight = height * scaleY
+  const sine = Math.abs(Math.sin(radians))
+  const cosine = Math.cos(radians)
+
+  return cosine >= 0
+    ? halfWidth * sine
+    : halfWidth * sine - scaledHeight * cosine
+}
+
 export function RestingCube({
   comment,
   onPositionChange,
@@ -38,7 +56,7 @@ export function RestingCube({
   const [scope, animate] = useAnimate<HTMLDivElement>()
   const [reactionScope, animateReaction] = useAnimate<HTMLDivElement>()
   const reduceMotion = useReducedMotion() ?? false
-  const cubeMotion = useRef({ rotate: 0, x: 0 })
+  const cubeMotion = useRef({ rotate: 0, x: 0, y: 0 })
 
   useEffect(() => {
     if (paused || reduceMotion || !reaction || !scope.current) {
@@ -49,15 +67,33 @@ export function RestingCube({
     const start = cubeMotion.current
     const targetX = start.x === 0 ? direction * CUBE_JUMP_DISTANCE : -start.x
     const targetRotate = start.rotate + direction * 90
-    cubeMotion.current = { rotate: targetRotate, x: targetX }
+    const cubeStyle = getComputedStyle(scope.current)
+    const cubeWidth = Number.parseFloat(cubeStyle.width)
+    const cubeHeight = Number.parseFloat(cubeStyle.height)
+    const middleRotate = start.rotate + direction * 45
+    const middleGroundOffset = groundOffsetForRotation(
+      middleRotate,
+      cubeWidth,
+      cubeHeight,
+      0.96,
+      1.05,
+    )
+    const targetGroundOffset = groundOffsetForRotation(
+      targetRotate,
+      cubeWidth,
+      cubeHeight,
+    )
+    const middleY = Math.min(-48, -middleGroundOffset - 24)
+    const targetY = -targetGroundOffset
+    cubeMotion.current = { rotate: targetRotate, x: targetX, y: targetY }
     onPositionChange(targetX)
 
     void animate(
       scope.current,
       {
         x: [start.x, start.x + (targetX - start.x) * 0.52, targetX],
-        y: [0, -48, 0],
-        rotate: [start.rotate, start.rotate + direction * 45, targetRotate],
+        y: [start.y, middleY, targetY],
+        rotate: [start.rotate, middleRotate, targetRotate],
         scaleX: [1, 0.96, 1],
         scaleY: [1, 1.05, 1],
       },
@@ -90,38 +126,42 @@ export function RestingCube({
     <div
       className="cube-anchor"
       data-cube-reaction={reaction?.nonce}
-      data-opening-cube
       data-resting-cube
-      ref={scope}
     >
-      <div className="cube-anchor__reaction" ref={reactionScope}>
-        <motion.div
-          animate={
-            paused || reduceMotion
-              ? { rotate: 0, scaleX: 1, scaleY: 1, x: 0, y: 0 }
-              : {
-                  rotate: [0, -1.5, 1.25, 0],
-                  scaleX: [1, 1.018, 0.992, 1],
-                  scaleY: [1, 0.986, 1.012, 1],
-                  x: [0, -6, 6, 0],
-                  y: [0, -7, -2, 0],
-                }
-          }
-          className="cube-anchor__idle"
-          transition={
-            paused || reduceMotion
-              ? { duration: 0.2 }
-              : {
-                  duration: 3.2,
-                  ease: 'easeInOut',
-                  repeat: Infinity,
-                  repeatDelay: 0.25,
-                }
-          }
-        >
-          <img alt="" className="cube-anchor__image" src={characterAssets.cube} />
-        </motion.div>
-      </div>
+      <motion.div
+        animate={
+          paused || reduceMotion
+            ? { rotate: 0, scaleX: 1, scaleY: 1, x: 0, y: 0 }
+            : {
+                rotate: [0, -1.5, 1.25, 0],
+                scaleX: [1, 1.018, 0.992, 1],
+                scaleY: [1, 0.986, 1.012, 1],
+                x: [0, -6, 6, 0],
+                y: [0, -10, -5, 0],
+              }
+        }
+        className="cube-anchor__idle"
+        transition={
+          paused || reduceMotion
+            ? { duration: 0.2 }
+            : {
+                duration: 3.2,
+                ease: 'easeInOut',
+                repeat: Infinity,
+                repeatDelay: 0.25,
+              }
+        }
+      >
+        <div className="cube-anchor__reaction" ref={reactionScope}>
+          <div
+            className="cube-anchor__motion"
+            data-opening-cube
+            ref={scope}
+          >
+            <img alt="" className="cube-anchor__image" src={characterAssets.cube} />
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }

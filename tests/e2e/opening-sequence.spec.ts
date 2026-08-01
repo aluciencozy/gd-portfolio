@@ -1,4 +1,26 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+async function readCubeGrounding(page: Page): Promise<{
+  anchorBottom: number
+  groundTop: number
+  imageBottom: number
+}> {
+  return page.evaluate(() => {
+    const anchor = document.querySelector('.cube-anchor')
+    const image = document.querySelector('.cube-anchor__image')
+    const ground = document.querySelector('.scene-ground__horizon')
+
+    if (!anchor || !image || !ground) {
+      throw new Error('Cube grounding elements are missing')
+    }
+
+    return {
+      anchorBottom: anchor.getBoundingClientRect().bottom,
+      groundTop: ground.getBoundingClientRect().top,
+      imageBottom: image.getBoundingClientRect().bottom,
+    }
+  })
+}
 
 test('plays the opening sequence and settles into the hero layout', async ({
   page,
@@ -16,6 +38,12 @@ test('plays the opening sequence and settles into the hero layout', async ({
   expect(openingCube).not.toBeNull()
   expect(openingCube!.width).toBeGreaterThan(200)
 
+  await page.waitForTimeout(900)
+  const openingLanding = await readCubeGrounding(page)
+  expect(openingLanding.imageBottom).toBeLessThanOrEqual(
+    openingLanding.groundTop + 1,
+  )
+
   await page.keyboard.press('End')
   await expect(page).toHaveURL(/#hero$/)
 
@@ -32,9 +60,27 @@ test('plays the opening sequence and settles into the hero layout', async ({
   expect(settledCube!.x).toBeLessThan(200)
   expect(settledCube!.width).toBeLessThan(openingCube!.width)
 
+  const settledGrounding = await readCubeGrounding(page)
+  expect(settledGrounding.anchorBottom).toBeCloseTo(
+    settledGrounding.groundTop,
+    1,
+  )
+  expect(settledGrounding.imageBottom).toBeLessThanOrEqual(
+    settledGrounding.groundTop + 1,
+  )
+  const settledWidth = await page
+    .locator('.cube-anchor__motion')
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).width))
+  await page.waitForTimeout(400)
+  expect(
+    await page
+      .locator('.cube-anchor__motion')
+      .evaluate((element) => Number.parseFloat(getComputedStyle(element).width)),
+  ).toBeCloseTo(settledWidth, 2)
+
   await page.keyboard.press('End')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Let’s build something good.',
+    'CONTACT COMPLETE!',
     { timeout: 10_000 },
   )
 })
